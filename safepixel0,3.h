@@ -2,18 +2,19 @@
 #include <iostream>
 #include <utility>
 #include <Windows.h>
-#include <set>
-#include <unordered_set>
+#include <vector>
+#include <bit>
+#include <bitset>
 #include "basicslib.h"
 using namespace std;
 
-
+typedef bitset<1> bit;
 
 void errp(char a) {
     switch (a)
     {
     default:
-        cout << "error at type" << a;
+        cout << "error at type: " << a <<endl;
         break;
     }
 }
@@ -23,6 +24,24 @@ public:
     char type;
     char gettype() {
         return type;
+    }
+    bit getbit(char a) {
+        switch (a)
+        {
+        default:
+            errp(type);
+            return 0;
+            break;
+        }
+    }
+    void writebit(char a, bit b) {
+        switch (a)
+        {
+        default:
+            errp(type);
+            return;
+            break;
+        }
     }
     int getint(char a) {
         switch (a)
@@ -150,40 +169,92 @@ struct Change {
     char path;
 };
 
+typedef Change<bit>(*ptobf)(Pixel);
 typedef Change<int> (*ptoif)(Pixel);
 typedef Change<float>(*ptoff)(Pixel);
 typedef Change<Pixel>(*ptopf)(Pixel);
 typedef bool (*conditionchar)(Pixel);
 struct func2d {
     conditionchar condition;
-    ctocf func;
     bool toupdate;
     int x;
     int y;
+    bitset<2> typef;
 };
 struct funcarr {
-    void** arr = new void*[1];
+    void** arr = nullptr;
+    func2d* settingarr = nullptr;
     int size1 = 0;
     ~funcarr() {
         delete[] arr;
     }
-    void addell(ptoif func, int x, int y, bool toupdate=true,conditionchar condition=truec) {
+    void addell(ptobf func, int x, int y, bool toupdate=true,conditionchar condition=truec) {
         resize(arr, size1, size1 + 1);
+        resize(settingarr, size1, size1 + 1);
         func2d a;
         a.condition = condition;
-        a.func = func;
         a.toupdate = toupdate;
         a.x = x;
         a.y = y;
-        arr[size1] = &a;
+        a.typef = 0;
+        settingarr[size1] = a;
+        arr[size1] = func;
+        size1++;
+    }
+    void addell(ptoif func, int x, int y, bool toupdate = true, conditionchar condition = truec) {
+        resize(arr, size1, size1 + 1);
+        resize(settingarr, size1, size1 + 1);
+        func2d a;
+        a.condition = condition;
+        a.toupdate = toupdate;
+        a.x = x;
+        a.y = y;
+        a.typef = 1;
+        settingarr[size1] = a;
+        arr[size1] = func;
+        size1++;
+    }
+    void addell(ptoff func, int x, int y, bool toupdate = true, conditionchar condition = truec) {
+        resize(arr, size1, size1 + 1);
+        resize(settingarr, size1, size1 + 1);
+        func2d a;
+        a.condition = condition;
+        a.toupdate = toupdate;
+        a.x = x;
+        a.y = y;
+        a.typef = 2;
+        settingarr[size1] = a;
+        arr[size1] = func;
+        size1++;
+    }
+    void addell(ptopf func, int x, int y, bool toupdate = true, conditionchar condition = truec) {
+        resize(arr, size1, size1 + 1);
+        resize(settingarr, size1, size1 + 1);
+        func2d a;
+        a.condition = condition;
+        a.toupdate = toupdate;
+        a.x = x;
+        a.y = y;
+        a.typef = 3;
+        settingarr[size1] = a;
+        arr[size1] = func;
         size1++;
     }
     int size() {
         return size1;
+    }; 
+    bitset<2> typef(int i) {
+        if (i < size1) {
+            return (settingarr[i].typef);
+        }
+        else {
+            cout << "ERROR OUT OF INDEX X";
+        }
+
     };
     int x(int i) {
         if (i < size1) {
-            return (*(int*)(arr[i]).x);
+            return (settingarr[i].x);
         }
         else {
             cout << "ERROR OUT OF INDEX X";
@@ -192,23 +263,47 @@ struct funcarr {
     };
     int y(int i) {
         if (i < size1) {
-            return (arr[i].y);
+            return (settingarr[i].y);
         }
         else {
             cout << "ERROR OUT OF INDEX Y";
         }
     };
-    ctocf func(int i) {
+    ptobf funcb(int i) {
         if (i < size1) {
-            return (arr[i].func);
+            return (*(ptobf*)arr[i]);
         }
         else {
-            cout << "ERROR OUT OF INDEX FUNC";
+            cout << "ERROR OUT OF INDEX FUNCB";
+        }
+    };
+    ptoif funci(int i) {
+        if (i < size1) {
+            return (*(ptoif*)arr[i]);
+        }
+        else {
+            cout << "ERROR OUT OF INDEX FUNCI";
+        }
+    };
+    ptoff funcf(int i) {
+        if (i < size1) {
+            return (*(ptoff*)arr[i]);
+        }
+        else {
+            cout << "ERROR OUT OF INDEX FUNCF";
+        }
+    };
+    ptopf funcp(int i) {
+        if (i < size1) {
+            return (*(ptopf*)arr[i]);
+        }
+        else {
+            cout << "ERROR OUT OF INDEX FUNCP";
         }
     };
     conditionchar cond(int i) {
         if (i < size1) {
-            return (arr[i].condition);
+            return (settingarr[i].condition);
         }
         else {
             cout << "ERROR OUT OF INDEX COND";
@@ -216,24 +311,36 @@ struct funcarr {
     };
     bool doupdate(int i) {
         if (i < size1) {
-            return (arr[i].toupdate);
+            return (settingarr[i].toupdate);
         }
         else {
             cout << "ERROR OUT OF INDEX DOUPDATE";
         }
     };
 };
-
-template<typename T>
-void saferunup(T**& arr, int col, int row, int x, int y, funcarr& a, vector<pair<int, int>>& newupdateset) {
+struct change {
+    int y;
+    int x;
+    bitset<2> typef;
+    char path;
+    void* value;
+};
+void saferunup(Pixel** arr, int col, int row, int x, int y, funcarr& a, vector<pair<int, int>>& newupdateset, vector<change>& changeset) {
     int d = a.size();
     for (int i = 0; d > i; i++) {
-        if (not(((a.x(i) + x >= col) or (a.y(i) + y >= row)) or ((a.x(i) + x < 0) or (a.y(i) + y < 0)))) {
-            if(a.cond(i)(arr[x + a.x(i)][y + a.y(i)])){
-                arr[x + a.x(i)][y + a.y(i)] = a.func(i)(arr[x + a.x(i)][y + a.y(i)]);
-                if(a.doupdate(i)){
-                    newupdateset.push_back({ (x + a.x(i)),(y + a.y(i))});
-                }
+        if(a.cond(i)(arr[x + a.x(i)][y + a.y(i)])){
+            switch (a.typef(i).to_ulong())
+            {
+            case(0):
+                Change<bit> b=a.funcb(i)(arr[x + a.x(i)][y + a.y(i)]);
+            case(1):
+                Change<bit> b = a.funcb(i)(getvalue(arr,x + a.x(i),y + a.y(i));
+            default:
+                break;
+            }
+            arr[x + a.x(i)][y + a.y(i)] = 
+            if(a.doupdate(i)){
+                newupdateset.push_back({ (x + a.x(i)),(y + a.y(i))});
             }
         }
     }
