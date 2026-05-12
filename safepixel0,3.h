@@ -1,8 +1,8 @@
 #pragma once
 #include <iostream>
+#include <vector>
 #include <utility>
 #include <Windows.h>
-#include <vector>
 #include <bit>
 #include <bitset>
 #include "basicslib.h"
@@ -159,6 +159,38 @@ public:
         }
     }
 };
+void cordtrans(int col, int row, int x, int y, int& x1, int& y1) {
+    if (x >= col) {
+        x1 = x - col;
+    }else if(x<0){
+        x1 = x + col;
+    }
+    else {
+        x1 = x;
+    }
+    if (y >= row) {
+        x1 = x - row;
+    }
+    else if (y < 0) {
+        y1 = y + row;
+    }
+    else {
+        y1 = y;
+    }
+}
+
+Pixel getvalue(Pixel** arr, int col, int row, int x, int y) {
+    int x1=0;
+    int y1 = 0;
+    cordtrans(col, row, x, y, x1, y1);
+    return arr[x1][y1];
+}
+void setvalue(Pixel**& arr, int col, int row, int x, int y, Pixel a) {
+    int x1 = 0;
+    int y1 = 0;
+    cordtrans(col, row, x, y, x1, y1);
+    arr[x1][y1]=a;
+}
 bool truec(Pixel a) {
     return true;
 }
@@ -269,36 +301,12 @@ struct funcarr {
             cout << "ERROR OUT OF INDEX Y";
         }
     };
-    ptobf funcb(int i) {
+    void* func(int i) {
         if (i < size1) {
             return (*(ptobf*)arr[i]);
         }
         else {
             cout << "ERROR OUT OF INDEX FUNCB";
-        }
-    };
-    ptoif funci(int i) {
-        if (i < size1) {
-            return (*(ptoif*)arr[i]);
-        }
-        else {
-            cout << "ERROR OUT OF INDEX FUNCI";
-        }
-    };
-    ptoff funcf(int i) {
-        if (i < size1) {
-            return (*(ptoff*)arr[i]);
-        }
-        else {
-            cout << "ERROR OUT OF INDEX FUNCF";
-        }
-    };
-    ptopf funcp(int i) {
-        if (i < size1) {
-            return (*(ptopf*)arr[i]);
-        }
-        else {
-            cout << "ERROR OUT OF INDEX FUNCP";
         }
     };
     conditionchar cond(int i) {
@@ -318,37 +326,36 @@ struct funcarr {
         }
     };
 };
-struct change {
+
+struct updatee {
     int y;
     int x;
-    bitset<2> typef;
-    char path;
-    void* value;
-};
-void saferunup(Pixel** arr, int col, int row, int x, int y, funcarr& a, vector<pair<int, int>>& newupdateset, vector<change>& changeset) {
+    void* a;
+};  
+
+void saferunup(Pixel** arr, int col, int row, int x, int y, funcarr& a, vector<pair<int, int>>& newupdateset, vector<updatee>& changeset) {
     int d = a.size();
     for (int i = 0; d > i; i++) {
-        if(a.cond(i)(arr[x + a.x(i)][y + a.y(i)])){
-            switch (a.typef(i).to_ulong())
-            {
-            case(0):
-                Change<bit> b=a.funcb(i)(arr[x + a.x(i)][y + a.y(i)]);
-            case(1):
-                Change<bit> b = a.funcb(i)(getvalue(arr,x + a.x(i),y + a.y(i));
-            default:
-                break;
-            }
-            arr[x + a.x(i)][y + a.y(i)] = 
+        updatee b;
+        int x1;
+        int y1;
+        if(a.cond(i)(getvalue(arr, col, row, x + a.x(i), y + a.y(i)))){
+            b.x = x + a.x(i);
+            b.y = y + a.y(i);
+            case
+            b.a=&a.func(i)(getvalue(arr, col, row, x + a.x(i), y + a.y(i)));
             if(a.doupdate(i)){
+                cordtrans(col, row, x, y, x1, y1);
                 newupdateset.push_back({ (x + a.x(i)),(y + a.y(i))});
             }
+            changeset.push_back(b);
         }
     }
     return;
 }
 
 
-bool update(char**& arr, int col, int row, char target,vector<pair<int, int>> updateset, vector<pair<int, int>>& newupdateset, funcarr& funcarr) {
+bool update(Pixel**& arr, int col, int row, char target,vector<pair<int, int>> updateset, vector<pair<int, int>>& newupdateset, funcarr& funcarr) {
     bool a = false;
     for (pair<int, int> n : updateset) {
         if(arr[n.first][n.second]==target){
