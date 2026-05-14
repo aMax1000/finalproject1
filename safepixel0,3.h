@@ -5,20 +5,23 @@
 #include <Windows.h>
 #include <bit>
 #include <bitset>
+#include <typeinfo>
 #include "basicslib.h"
 using namespace std;
 
 typedef bitset<1> bit;
-
-void errp(char a) {
-    switch (a)
+//Can disable error messages for some types of "CANNONT FIND ELEMENT" 
+void errp(char type,char path) { 
+    switch (type)
     {
     default:
-        cout << "error at type: " << a <<endl;
+        cout << "CANNONT FIND ELEMENT: "<< path << "AT TYPE" << type << endl;
         break;
     }
 }
 
+
+//General Pixel class with dummy fucntions
 class Pixel {
 public:
     char type;
@@ -29,7 +32,7 @@ public:
         switch (a)
         {
         default:
-            errp(type);
+            errp(type,a);
             return 0;
             break;
         }
@@ -38,7 +41,7 @@ public:
         switch (a)
         {
         default:
-            errp(type);
+            errp(type, a);
             return;
             break;
         }
@@ -47,7 +50,7 @@ public:
         switch (a)
         {
         default:
-            errp(type);
+            errp(type, a);
             return 0;
             break;
         }
@@ -56,7 +59,7 @@ public:
         switch (a)
         {
         default:
-            errp(type);
+            errp(type, a);
             return;
             break;
         }
@@ -65,7 +68,7 @@ public:
         switch (a)
         {
         default:
-            errp(type);
+            errp(type, a);
             return 0;
             break;
         }
@@ -74,7 +77,7 @@ public:
         switch (a)
         {
         default:
-            errp(type);
+            errp(type, a);
             return;
             break;
         }
@@ -88,7 +91,7 @@ Pixel Pixel::getPixel(char a) {
     switch (a)
     {
     default:
-        errp(type);
+        errp(type, a);;
         return NULLPIXEL;
         break;
     }
@@ -97,14 +100,14 @@ void Pixel::writePixel(char a, Pixel b) {
     switch (a)
     {
     default:
-        errp(type);
+        errp(type, a);;
         return;
         break;
     }
 }
 
 
-// Derived class
+// Derived classes-materials
 class Sand : public Pixel {
 public:
     char type = 's';
@@ -115,7 +118,7 @@ public:
         case('t'): 
             return t;
         default:
-            errp(type);
+            errp(type, a);
             return 0;
             break;
         }
@@ -126,7 +129,7 @@ public:
         case('t'):
             t = b;
         default:
-            errp(type);
+            errp(type, a);
             return;
             break;
         }
@@ -142,7 +145,7 @@ public:
         case('t'):
             return t;
         default:
-            errp(type);
+            errp(type, a);
             return 0;
             break;
         }
@@ -153,12 +156,14 @@ public:
         case('t'):
             t = b;
         default:
-            errp(type);
+            errp(type, a);
             return;
             break;
         }
     }
 };
+
+//transition of cordinates to loop the board
 void cordtrans(int col, int row, int x, int y, int& x1, int& y1) {
     if (x >= col) {
         x1 = x - col;
@@ -178,7 +183,7 @@ void cordtrans(int col, int row, int x, int y, int& x1, int& y1) {
         y1 = y;
     }
 }
-
+//getting and setting of elements of board with transition 
 Pixel getvalue(Pixel** arr, int col, int row, int x, int y) {
     int x1=0;
     int y1 = 0;
@@ -194,18 +199,14 @@ void setvalue(Pixel**& arr, int col, int row, int x, int y, Pixel a) {
 bool truec(Pixel a) {
     return true;
 }
-
-template<typename T>
-struct Change {
-    T value;
-    char path;
-};
-
+//functions to change individual pixels
 typedef Change<bit>(*ptobf)(Pixel);
 typedef Change<int> (*ptoif)(Pixel);
 typedef Change<float>(*ptoff)(Pixel);
 typedef Change<Pixel>(*ptopf)(Pixel);
 typedef bool (*conditionchar)(Pixel);
+
+//settings of functions
 struct func2d {
     conditionchar condition;
     bool toupdate;
@@ -213,6 +214,8 @@ struct func2d {
     int y;
     bitset<2> typef;
 };
+
+//object to run array of functions with settings
 struct funcarr {
     void** arr = nullptr;
     func2d* settingarr = nullptr;
@@ -220,7 +223,7 @@ struct funcarr {
     ~funcarr() {
         delete[] arr;
     }
-    void addell(ptobf func, int x, int y, bool toupdate=true,conditionchar condition=truec) {
+    void addell(void* func, int x, int y, bool toupdate=true,conditionchar condition=truec) {
         resize(arr, size1, size1 + 1);
         resize(settingarr, size1, size1 + 1);
         func2d a;
@@ -228,46 +231,6 @@ struct funcarr {
         a.toupdate = toupdate;
         a.x = x;
         a.y = y;
-        a.typef = 0;
-        settingarr[size1] = a;
-        arr[size1] = func;
-        size1++;
-    }
-    void addell(ptoif func, int x, int y, bool toupdate = true, conditionchar condition = truec) {
-        resize(arr, size1, size1 + 1);
-        resize(settingarr, size1, size1 + 1);
-        func2d a;
-        a.condition = condition;
-        a.toupdate = toupdate;
-        a.x = x;
-        a.y = y;
-        a.typef = 1;
-        settingarr[size1] = a;
-        arr[size1] = func;
-        size1++;
-    }
-    void addell(ptoff func, int x, int y, bool toupdate = true, conditionchar condition = truec) {
-        resize(arr, size1, size1 + 1);
-        resize(settingarr, size1, size1 + 1);
-        func2d a;
-        a.condition = condition;
-        a.toupdate = toupdate;
-        a.x = x;
-        a.y = y;
-        a.typef = 2;
-        settingarr[size1] = a;
-        arr[size1] = func;
-        size1++;
-    }
-    void addell(ptopf func, int x, int y, bool toupdate = true, conditionchar condition = truec) {
-        resize(arr, size1, size1 + 1);
-        resize(settingarr, size1, size1 + 1);
-        func2d a;
-        a.condition = condition;
-        a.toupdate = toupdate;
-        a.x = x;
-        a.y = y;
-        a.typef = 3;
         settingarr[size1] = a;
         arr[size1] = func;
         size1++;
@@ -301,9 +264,33 @@ struct funcarr {
             cout << "ERROR OUT OF INDEX Y";
         }
     };
-    void* func(int i) {
+    ptobf funcb(int i) {
         if (i < size1) {
             return (*(ptobf*)arr[i]);
+        }
+        else {
+            cout << "ERROR OUT OF INDEX FUNCB";
+        }
+    };
+    ptoif funci(int i) {
+        if (i < size1) {
+            return (*(ptoif*)arr[i]);
+        }
+        else {
+            cout << "ERROR OUT OF INDEX FUNCB";
+        }
+    };
+    ptoff funcf(int i) {
+        if (i < size1) {
+            return (*(ptoff*)arr[i]);
+        }
+        else {
+            cout << "ERROR OUT OF INDEX FUNCB";
+        }
+    };
+    ptopf funcp(int i) {
+        if (i < size1) {
+            return (*(ptopf*)arr[i]);
         }
         else {
             cout << "ERROR OUT OF INDEX FUNCB";
@@ -327,26 +314,60 @@ struct funcarr {
     };
 };
 
+//derivative of Pixel
+template<typename T>
+struct Change {
+    T value;
+    char path;
+};
+
+//derivative of Pixel with coords of change
 struct updatee {
     int y;
     int x;
     void* a;
 };  
 
+//running array of functions
 void saferunup(Pixel** arr, int col, int row, int x, int y, funcarr& a, vector<pair<int, int>>& newupdateset, vector<updatee>& changeset) {
     int d = a.size();
     for (int i = 0; d > i; i++) {
         updatee b;
         int x1;
         int y1;
+        Change<bit> bi;
+        Change<int> in;
+        Change<float> floa;
+        Change<Pixel> pixe;
         if(a.cond(i)(getvalue(arr, col, row, x + a.x(i), y + a.y(i)))){
             b.x = x + a.x(i);
             b.y = y + a.y(i);
-            case
-            b.a=&a.func(i)(getvalue(arr, col, row, x + a.x(i), y + a.y(i)));
+            switch (typeid(a.funcb(i)).name()[3])
+            {
+            case('b'):
+                bi = (a.funcb(i))(getvalue(arr, col, row, x + a.x(i), y + a.y(i)));
+                b.a = &bi;
+                break;
+            case('i'):
+                in = (a.funci(i))(getvalue(arr, col, row, x + a.x(i), y + a.y(i)));
+                b.a = &in;
+                break;
+            case('f'):
+                floa = (a.funcf(i))(getvalue(arr, col, row, x + a.x(i), y + a.y(i)));
+                b.a = &floa;
+                break;
+            case('p'):
+                pixe = (a.funcp(i))(getvalue(arr, col, row, x + a.x(i), y + a.y(i)));
+                b.a = &pixe;
+                break;
+            default:
+                cout << "ERROR AT NAME OF FUCNTION";
+                break;
+            }
+                
             if(a.doupdate(i)){
                 cordtrans(col, row, x, y, x1, y1);
-                newupdateset.push_back({ (x + a.x(i)),(y + a.y(i))});
+                newupdateset.push_back({x1,y1});
             }
             changeset.push_back(b);
         }
@@ -354,7 +375,7 @@ void saferunup(Pixel** arr, int col, int row, int x, int y, funcarr& a, vector<p
     return;
 }
 
-
+//checking for target pixel paramiters among Pixels market to update
 bool update(Pixel**& arr, int col, int row, char target,vector<pair<int, int>> updateset, vector<pair<int, int>>& newupdateset, funcarr& funcarr) {
     bool a = false;
     for (pair<int, int> n : updateset) {
