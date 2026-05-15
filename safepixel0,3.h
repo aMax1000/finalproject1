@@ -6,6 +6,7 @@
 #include <bit>
 #include <bitset>
 #include <typeinfo>
+#include <any>
 #include "basicslib.h"
 using namespace std;
 
@@ -314,7 +315,7 @@ struct funcarr {
     };
 };
 
-//derivative of Pixel
+//path and value to change on Pixel
 template<typename T>
 struct Change {
     T value;
@@ -326,7 +327,13 @@ struct updatee {
     int y;
     int x;
     void* a;
+    bitset<2> typeoffunc;
 };  
+
+char getpath(void* a) {
+    
+}
+
 
 //running array of functions
 void saferunup(Pixel** arr, int col, int row, int x, int y, funcarr& a, vector<pair<int, int>>& newupdateset, vector<updatee>& changeset) {
@@ -374,43 +381,65 @@ void saferunup(Pixel** arr, int col, int row, int x, int y, funcarr& a, vector<p
     }
     return;
 }
-
+//function with condition to trigger it 
+struct funcexunit {
+    funcarr func;
+    conditionchar cond;
+};
 //checking for target pixel paramiters among Pixels market to update
-bool update(Pixel**& arr, int col, int row, char target,vector<pair<int, int>> updateset, vector<pair<int, int>>& newupdateset, funcarr& funcarr) {
-    bool a = false;
+void update(Pixel**& arr, int col, int row, 
+    vector<pair<int, int>> updateset, vector<pair<int, int>>& newupdateset, 
+    vector<funcexunit> funcs, vector<updatee>& changeset) 
+{
+    Pixel point;
     for (pair<int, int> n : updateset) {
-        if(arr[n.first][n.second]==target){
-            saferunup(arr, col, row, n.first, n.second, funcarr,newupdateset);
-        }
-    }
-    return a;
-}
-
-
-
-
-
-template<typename T>
-void saferun(T**& arr, int col, int row, int x, int y, funcarr& a) {
-    int d = a.size();
-    for (int i = 0; d > i; i++) {
-        if (not(((a.x(i) + x >= col) or (a.y(i) + y >= row)) or ((a.x(i) + x < 0) or (a.y(i) + y < 0)))) {
-            if (a.cond(i)) {
-                arr[x + a.x(i)][y + a.y(i)] = a.func(i)(arr[x + a.x(i)][y + a.y(i)]);
+        point = getvalue(arr, col, row, n.first, n.second);
+        for(funcexunit a : funcs){
+            if(a.cond(point)){
+                saferunup(arr, col, row, n.first, n.second, a.func,newupdateset, changeset);
             }
         }
     }
     return;
 }
-bool scanfor(char**& arr, int col, int row, char target, funcarr& func) {
-    bool a = false;
-    for (int i = 0; col > i; i++) {
-        for (int j = 0; row > j; j++) {
-            if (arr[i][j] == target) {
-                a = true;
-                saferun(arr, col, row, i, j, func);
-            }
-        }
+
+
+void applychange(Pixel**& arr, int col, int row, updatee a) {
+    switch (a.typeoffunc.to_ulong())
+    {
+    case 0:
+        writebit(a.a.)
+    default:
+        break;
     }
-    return a;
 }
+void applychangeset(Pixel**& arr, int col, int row, vector<updatee>& changeset) {
+    for (updatee a : changeset) {
+
+    }
+}
+
+//template<typename T>
+//void saferun(T**& arr, int col, int row, int x, int y, funcarr& a) {
+//    int d = a.size();
+//    for (int i = 0; d > i; i++) {
+//        if (not(((a.x(i) + x >= col) or (a.y(i) + y >= row)) or ((a.x(i) + x < 0) or (a.y(i) + y < 0)))) {
+//            if (a.cond(i)) {
+//                arr[x + a.x(i)][y + a.y(i)] = a.func(i)(arr[x + a.x(i)][y + a.y(i)]);
+//            }
+//        }
+//    }
+//    return;
+//}
+//bool scanfor(char**& arr, int col, int row, char target, funcarr& func) {
+//    bool a = false;
+//    for (int i = 0; col > i; i++) {
+//        for (int j = 0; row > j; j++) {
+//            if (arr[i][j] == target) {
+//                a = true;
+//                saferun(arr, col, row, i, j, func);
+//            }
+//        }
+//    }
+//    return a;
+//}
