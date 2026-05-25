@@ -11,26 +11,26 @@
 #include "basicslib.h"
 #include "safepixel0,3.h"
 
-bool isair2(Pixel** a, int col, int row, int y, int x) {
-    return (*getvalue(a,col,row,y + 1,x)).getint('t') == 'a' 
+bool isair2(Pixel*** a, int col, int row, int ay, int ax) {
+    return getvalue(a, col, row, ay + 1, ax)->getint('t') == 'a'
         ;
     //or (*getvalue(a, col, row, y+1, x - 1)).getint('t')=='a'
     //or (*getvalue(a, col, row, y + 1, x + 1)).getint('t') == 'a'
 }
-bool isair(Pixel** a, int col, int row, int y, int x) {
-    return (a[x][y]).getint('t') == 'a';
+bool isair(Pixel*** a, int col, int row, int ay, int ax) {
+    return (a[ay][ax])->getint('t') == 'a';
 }
-bool issand(Pixel** a, int col, int row, int y, int x) {
-    return (a[x][y]).getint('t') == 's';
+bool issand(Pixel*** a, int col, int row, int ay, int ax) {
+    return (a[ay][ax])->getint('t') == 's';
 }
-bool isairdiag(Pixel** a, int col, int row, int y, int x) {
-    return (*getvalue(a, col, row, y, x - 1)).getint('t') != 'a' and (a[y][x]).getint('t') == 'a';
-}
-bool isairdiag2(Pixel** a, int col, int row, int x, int y) {
-    return (*getvalue(a, col, row, y , x + 1)).getint('t') != 'a'
-        and (*getvalue(a, col, row, y , x + 2)).getint('t') != 'a'
-        and (a[x][y]).getint('t') == 'a';
-}
+//bool isairdiag(Pixel** a, int col, int row, int y, int x) {
+//    return (*getvalue(a, col, row, y, x - 1)).getint('t') != 'a' and (a[y][x]).getint('t') == 'a';
+//}
+//bool isairdiag2(Pixel** a, int col, int row, int x, int y) {
+//    return (*getvalue(a, col, row, y, x + 1)).getint('t') != 'a'
+//        and (*getvalue(a, col, row, y, x + 2)).getint('t') != 'a'
+//        and (a[x][y]).getint('t') == 'a';
+//}
 Changei gravity(Pixel* a, Pixel* b) {
     Changei c;
     c.path = 't';
@@ -43,10 +43,10 @@ Changei returngravity(Pixel* a, Pixel* b) {
     c.value = 'a';
     return c;
 };
-void printboard(Pixel** arr, int col, int row) {
+void printboard(Pixel*** arr, int col, int row) {
     for (int i = 0; col > i; i++) {
         for (int j = 0; row > j; j++) {
-            std::cout << static_cast<char>((arr[i][j]).getint('t')) << ' ';
+            std::cout << static_cast<char>((arr[i][j]->getint('t'))) << ' ';
         }
         std::cout << std::endl;
     }
@@ -56,7 +56,7 @@ void printboard(Pixel** arr, int col, int row) {
 //private:
 //    int* arr=nullptr;
 //public:
-//    //ДЕКОНСТРУКТОР РАБОТАЕТ 2 РАЗА ЕСЛИ ОБЬЕКТ В ВЕКТОРЕ
+//    //ДЕСТРУКТОР РАБОТАЕТ 2 РАЗА ЕСЛИ ОБЬЕКТ В ВЕКТОРЕ
 //    //~customstr() {
 //    //    delete[] arr;
 //    //}
@@ -91,22 +91,23 @@ int main()
     //    intarr.push_back(abbb);
     //}
     //testfun(intarr);
-    int col = 10;
-    int row = 10;
+    clock_t before = clock();
+    int col = 1000;
+    int row = 1000;
     Air asss;
     Sand sand;
-    Pixel** arr = new Pixel * [col];
+    Pixel*** arr = new Pixel ** [col];
     for (int i = 0; i < col; i++) {
-        arr[i] = new Pixel[row];
+        arr[i] = new Pixel*[row];
     }
     for (int i = 0; i < col; i++) {
         for (int j = 0; j < row; j++) {
-            arr[i][j] = asss;
+            arr[i][j] = new Air;    
         }
     }
-    arr[0][1] = sand;
-    arr[1][1] = sand;
-    arr[2][1] = sand;
+    for (int i = 0; i < col;i++) {
+        arr[0][i] = new Sand;
+    }
     //cout<< (*(arr[0][9])).getint('t');
     vector<funcexunit> a;
     vector<funcexunit> b;
@@ -122,16 +123,26 @@ int main()
     b.push_back(t);
     vector<pair<int, int>> updateset;//unused
     vector<updatee> changeset;
+    int i = 0;
     while (!gg) {
+        
         //cout<<a[0].func.x(0)<<endl;
         checkfor(arr, col, row, updateset, a, changeset);
-        printboard(arr, col, row);
+        //printboard(arr, col, row);
         //cout << changeset[0].typeoffunc<<endl;
-        cin >> gg;
+        //cin >> gg;
         //cout << "a3: " << static_cast<int>((*(Changei*)changeset[0].a).path) << endl;
         applychangeset(arr, col, row, changeset);
         //cout << a[0].func.x(0) << endl;
-        
+        //cout<<updateset.size();
+        updateset.clear();
+        //if (log2(i) == floor(log2(i))) {
+        //    cout << i <<'\n';
+        //}
+        if (i == 32) {
+            cout << "time:" << static_cast<float>(clock() - before) / CLOCKS_PER_SEC;
+        }
+        i++;
     }
 }
 
