@@ -11,18 +11,24 @@
 #include "basicslib.h"
 #include "safepixel0,3.h"
 
-bool issand(Pixel** a, int col, int row, int x, int y) {
-    return (a[x][y]).getint('t') == 's';
+bool isair2(Pixel** a, int col, int row, int y, int x) {
+    return (*getvalue(a,col,row,y + 1,x)).getint('t') == 'a' 
+        ;
+    //or (*getvalue(a, col, row, y+1, x - 1)).getint('t')=='a'
+    //or (*getvalue(a, col, row, y + 1, x + 1)).getint('t') == 'a'
 }
-bool isair(Pixel** a,int col,int row,int x,int y) {
+bool isair(Pixel** a, int col, int row, int y, int x) {
     return (a[x][y]).getint('t') == 'a';
 }
-bool isairdiag(Pixel** a, int col, int row, int x, int y) {
-    return (*getvalue(a,col,row,x-1,y)).getint('t') != 'a' and (a[x][y]).getint('t') == 'a';
+bool issand(Pixel** a, int col, int row, int y, int x) {
+    return (a[x][y]).getint('t') == 's';
+}
+bool isairdiag(Pixel** a, int col, int row, int y, int x) {
+    return (*getvalue(a, col, row, y, x - 1)).getint('t') != 'a' and (a[y][x]).getint('t') == 'a';
 }
 bool isairdiag2(Pixel** a, int col, int row, int x, int y) {
-    return (*getvalue(a, col, row, x + 1, y)).getint('t') != 'a'
-        and (*getvalue(a, col, row, x + 2, y)).getint('t') != 'a'
+    return (*getvalue(a, col, row, y , x + 1)).getint('t') != 'a'
+        and (*getvalue(a, col, row, y , x + 2)).getint('t') != 'a'
         and (a[x][y]).getint('t') == 'a';
 }
 Changei gravity(Pixel* a, Pixel* b) {
@@ -34,7 +40,7 @@ Changei gravity(Pixel* a, Pixel* b) {
 Changei returngravity(Pixel* a, Pixel* b) {
     Changei c;
     c.path = 't';
-    c.value='a';
+    c.value = 'a';
     return c;
 };
 void printboard(Pixel** arr, int col, int row) {
@@ -46,13 +52,47 @@ void printboard(Pixel** arr, int col, int row) {
     }
 }
 
+//class customstr {
+//private:
+//    int* arr=nullptr;
+//public:
+//    //ДЕКОНСТРУКТОР РАБОТАЕТ 2 РАЗА ЕСЛИ ОБЬЕКТ В ВЕКТОРЕ
+//    //~customstr() {
+//    //    delete[] arr;
+//    //}
+//    customstr() {
+//        arr= new int[5] { 1, 2, 3, 4, 5 };
+//    }
+//
+//    int getvalue(int i) {
+//        if (i < 5) {
+//            return arr[i];
+//        }
+//    }
+//};
+//void testfun2(customstr& a) {
+//    for (int i = 0; i < 5; i++) {
+//        cout << a.getvalue(i);
+//    }
+//    cout << endl;
+//}
+//
+//void testfun(vector<customstr>& a) {
+//    for (customstr i:a) {
+//        testfun2(i);
+//    }
+//}
+
 int main()
 {
-    //Air b;
-    //Pixel* a = &b;
-    //cout << b.getint('t');
-    int col = 2;
-    int row = 2;
+    //vector<customstr> intarr;
+    //customstr abbb;
+    //for (int i = 0; i < 5; i++) {
+    //    intarr.push_back(abbb);
+    //}
+    //testfun(intarr);
+    int col = 10;
+    int row = 10;
     Air asss;
     Sand sand;
     Pixel** arr = new Pixel * [col];
@@ -65,13 +105,16 @@ int main()
         }
     }
     arr[0][1] = sand;
+    arr[1][1] = sand;
+    arr[2][1] = sand;
     //cout<< (*(arr[0][9])).getint('t');
     vector<funcexunit> a;
     vector<funcexunit> b;
     funcexunit t;
-    int gg=0;
+    int gg = 0;
     funcarr tempwrite;
-    tempwrite.addell(gravity,1,0,true, isair);
+    tempwrite.addell(gravity, 1, 0, true, isair);
+    tempwrite.addell(returngravity, 0, 0, true, isair2);
     //tempwrite.addell(gravity, 1, 1, true, isairdiag);
     //tempwrite.addell(gravity, 1, -1, true, isairdiag2);
     t.addell(tempwrite, issand);
@@ -79,10 +122,16 @@ int main()
     b.push_back(t);
     vector<pair<int, int>> updateset;//unused
     vector<updatee> changeset;
-    while(!gg){
-    checkfor(arr, col, row, updateset, a, changeset);
-    printboard(arr, col, row);
-    cin >> gg;
+    while (!gg) {
+        //cout<<a[0].func.x(0)<<endl;
+        checkfor(arr, col, row, updateset, a, changeset);
+        printboard(arr, col, row);
+        //cout << changeset[0].typeoffunc<<endl;
+        cin >> gg;
+        //cout << "a3: " << static_cast<int>((*(Changei*)changeset[0].a).path) << endl;
+        applychangeset(arr, col, row, changeset);
+        //cout << a[0].func.x(0) << endl;
+        
     }
 }
 
@@ -96,4 +145,3 @@ int main()
 //   4. Use the Error List window to view errors
 //   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
 //   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
-   
