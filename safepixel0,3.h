@@ -8,6 +8,7 @@
 #include <typeinfo>
 #include <any>
 #include "basicslib.h"
+#include <set>
 using namespace std;
 
 typedef bitset<1> bit;
@@ -208,11 +209,11 @@ void cordtrans(int col, int row, int x, int y, int& x1, int& y1) {
     }
 }
 //getting element ta coords of board with transition 
-Pixel* getvalue(Pixel** arr, int col, int row, int x, int y) {
+Pixel* getvalue(Pixel*** arr, int col, int row, int x, int y) {
     int x1 = 0;
     int y1 = 0;
     cordtrans(col, row, x, y, x1, y1);
-    return arr[x1] + y1;
+    return arr[x1][y1];
 }
 //idk why you need with
 void setvalue(Pixel**& arr, int col, int row, int x, int y, Pixel a) {
@@ -221,7 +222,7 @@ void setvalue(Pixel**& arr, int col, int row, int x, int y, Pixel a) {
     cordtrans(col, row, x, y, x1, y1);
     arr[x1][y1] = a;
 }
-bool truec(Pixel** arr, int col, int row, int x, int y) {
+bool truec(Pixel*** arr, int col, int row, int x, int y) {
     return true;
 }
 //path and value to change on Pixel
@@ -247,7 +248,7 @@ typedef Changeb(*ptobf)(Pixel*, Pixel*);
 typedef Changei(*ptoif)(Pixel*, Pixel*);
 typedef Changef(*ptoff)(Pixel*, Pixel*);
 typedef Changep(*ptopf)(Pixel*, Pixel*);
-typedef bool (*conditionchar)(Pixel**, int, int, int, int);
+typedef bool (*conditionchar)(Pixel***, int, int, int, int);
 
 //settings of functions
 struct func2d {
@@ -420,11 +421,11 @@ struct updatee {
     int y;
     int x;
     void* a;
-    bitset<2> typeoffunc=1;
+    bitset<2> typeoffunc = 1;
 };
 
 //running array of functions
-void saferunup(Pixel** arr, int col, int row, int x, int y, funcarr& a, vector<pair<int, int>>& newupdateset, vector<updatee>& changeset) {
+void saferunup(Pixel*** arr, int col, int row, int x, int y, funcarr& a, vector<pair<int, int>>& newupdateset, vector<updatee>& changeset) {
     int d = a.size();
     updatee b;
     int x1;
@@ -434,24 +435,24 @@ void saferunup(Pixel** arr, int col, int row, int x, int y, funcarr& a, vector<p
         //cout << "q:: " << a.x(0) << endl;
         cordtrans(col, row, x + a.x(i), y + a.y(i), b.x, b.y);
         if (a.cond(i)(arr, col, row, b.x, b.y)) {
-            
+
             switch (a.typeof(i))
             {
             case(0):
                 b.a = new Changeb;
-                *(Changeb*)b.a = (a.funcb(i))(arr[b.x] + b.y, initialpixel);
+                *(Changeb*)b.a = (a.funcb(i))(arr[b.x][b.y], initialpixel);
                 break;
             case(1):
                 b.a = new Changei;
-                *(Changei*)b.a = (a.funci(i))(arr[b.x] + b.y, initialpixel);
+                *(Changei*)b.a = (a.funci(i))(arr[b.x][b.y], initialpixel);
                 break;
             case(2):
                 b.a = new Changef;
-                *(Changef*)b.a = (a.funcf(i))(arr[b.x] + b.y, initialpixel);
+                *(Changef*)b.a = (a.funcf(i))(arr[b.x][b.y], initialpixel);
                 break;
             case(3):
                 b.a = new Changep;
-                *(Changep*)b.a = (a.funcp(i))(arr[b.x] + b.y, initialpixel);
+                *(Changep*)b.a = (a.funcp(i))(arr[b.x][b.y], initialpixel);
                 break;
             default:
                 cout << "ERROR AT NAME OF FUCNTION";
@@ -481,8 +482,8 @@ struct funcexunit {
     }
 };
 //checking for target pixel paramiters among Pixels marked to update
-void update(Pixel**& arr, int col, int row,
-    vector<pair<int, int>>& updateset, vector<pair<int, int>>& newupdateset,
+void update(Pixel***& arr, int col, int row,
+    set<pair<int, int>>& updateset, vector<pair<int, int>>& newupdateset,
     vector<funcexunit>& funcs, vector<updatee>& changeset) {
     for (funcexunit a : funcs) {
         for (pair<int, int> n : updateset) {
@@ -495,36 +496,36 @@ void update(Pixel**& arr, int col, int row,
 }
 
 //applying 1 change io 1 pixel
-void applychange(Pixel**& arr, int col, int row, updatee& a) {
+void applychange(Pixel***& arr, int col, int row, updatee& a) {
     //cout <<"A: " <<static_cast<int>((*(Changei*)a.a).path);
     switch (a.typeoffunc.to_ulong())
     {
     case(0):
-        arr[a.x][a.y].writebit((*(Changeb*)a.a).path, (*(Changeb*)a.a).value);
+        (*arr[a.x][a.y]).writebit((*(Changeb*)a.a).path, (*(Changeb*)a.a).value);
         break;
     case(1):
-        arr[a.x][a.y].writeint(((*(Changei*)a.a).path), (*(Changei*)a.a).value);
+        (*arr[a.x][a.y]).writeint(((*(Changei*)a.a).path), (*(Changei*)a.a).value);
         break;
     case(2):
-        arr[a.x][a.y].writefloat((*(Changef*)a.a).path, (*(Changef*)a.a).value);
+        (*arr[a.x][a.y]).writefloat((*(Changef*)a.a).path, (*(Changef*)a.a).value);
         break;
     case(3):
-        arr[a.x][a.y].writePixel((*(Changep*)a.a).path, (*(Changep*)a.a).value);
+        (*arr[a.x][a.y]).writePixel((*(Changep*)a.a).path, (*(Changep*)a.a).value);
         break;
     default:
         break;
     }
 }
 //loops applying
-void applychangeset(Pixel**& arr, int col, int row, vector<updatee>& changeset) {
+void applychangeset(Pixel***& arr, int col, int row, vector<updatee>& changeset) {
     for (updatee a : changeset) {
         //cout << changeset[0].typeoffunc << endl;
         applychange(arr, col, row, a);
-        //delete &a;
+        delete a.a;
     }
     changeset.clear();
 }
-void checkfor(Pixel**& arr, int col, int row, vector<pair<int, int>>& newupdateset,
+void checkfor(Pixel***& arr, int col, int row, vector<pair<int, int>>& newupdateset,
     vector<funcexunit>& funcs, vector<updatee>& changeset) {
     for (funcexunit a : funcs) {
         for (int i = 0; i < col; i++) {
@@ -535,7 +536,7 @@ void checkfor(Pixel**& arr, int col, int row, vector<pair<int, int>>& newupdates
                     //cout << "a41: " << static_cast<int>((*(Changei*)changeset[0].a).path) << endl;
                     //cout << "E:: " << funcs[0].func.x(0) << endl;
                 }
-                
+
             }
         }
         //cout << "a44: " << static_cast<int>((*(Changei*)changeset[0].a).path) << endl;
