@@ -189,23 +189,22 @@ public:
 
 //transition of cordinates to loop the board
 void cordtrans(int col, int row, int x, int y, int& x1, int& y1) {
-    if (x >= col) {
-        x1 = x - col;
+    if (x < col and x >= 0) {
+        x1 = x;
     }
     else if (x < 0) {
         x1 = x + col;
+    }else{
+        x1 = x - col;
     }
-    else {
-        x1 = x;
-    }
-    if (y >= row) {
-        y1 = y - row;
+    if (y < row and y >= 0) {
+        y1 = y;
     }
     else if (y < 0) {
-        y1 = y + row;
+        y1 =y + row;
     }
     else {
-        y1 = y;
+        y1 = y - row;
     }
 }
 //getting element ta coords of board with transition 
@@ -216,11 +215,11 @@ Pixel* getvalue(Pixel*** arr, int col, int row, int x, int y) {
     return arr[x1][y1];
 }
 //idk why you need with
-void setvalue(Pixel**& arr, int col, int row, int x, int y, Pixel a) {
+void setvalue(Pixel*** arr, int col, int row, int x, int y, Pixel a) {
     int x1 = 0;
     int y1 = 0;
     cordtrans(col, row, x, y, x1, y1);
-    arr[x1][y1] = a;
+    *arr[x1][y1] = a;
 }
 bool truec(Pixel*** arr, int col, int row, int x, int y) {
     return true;
@@ -425,7 +424,9 @@ struct updatee {
 };
 
 //running array of functions
-void saferunup(Pixel*** arr, int col, int row, int x, int y, funcarr& a, vector<pair<int, int>>& newupdateset, vector<updatee>& changeset) {
+void saferunup(Pixel*** arr, int col, int row, int x, int y, funcarr& a, 
+    vector<pair<int, int>>& newupdateset, vector<updatee>& changeset) {
+    clock_t before2 = clock();
     int d = a.size();
     updatee b;
     int x1;
@@ -470,6 +471,7 @@ void saferunup(Pixel*** arr, int col, int row, int x, int y, funcarr& a, vector<
         }
         //cout << "Q:: " << a.x(0) << endl;
     }
+    //before1+=(clock()- before2);
     return;
 }
 //function with condition to trigger it 
@@ -482,21 +484,21 @@ struct funcexunit {
     }
 };
 //checking for target pixel paramiters among Pixels marked to update
-void update(Pixel***& arr, int col, int row,
-    set<pair<int, int>>& updateset, vector<pair<int, int>>& newupdateset,
-    vector<funcexunit>& funcs, vector<updatee>& changeset) {
-    for (funcexunit a : funcs) {
-        for (pair<int, int> n : updateset) {
-            if (a.cond(arr, row, col, n.first, n.second)) {
-                saferunup(arr, col, row, n.first, n.second, a.func, newupdateset, changeset);
-            }
-        }
-    }
-    return;
-}
+//void update(Pixel*** arr, int col, int row,
+//    vector<pair<int, int>>& updateset, vector<pair<int, int>>& newupdateset,
+//    vector<funcexunit>& funcs, vector<updatee>& changeset) {
+//    for (funcexunit a : funcs) {
+//        for (pair<int, int> n : updateset) {
+//            if (a.cond(arr, row, col, n.first, n.second)) {
+//                saferunup(arr, col, row, n.first, n.second, a.func, newupdateset, changeset);
+//            }
+//        }
+//    }
+//    return;
+//}
 
 //applying 1 change io 1 pixel
-void applychange(Pixel***& arr, int col, int row, updatee& a) {
+void applychange(Pixel*** arr, int col, int row, updatee& a) {
     //cout <<"A: " <<static_cast<int>((*(Changei*)a.a).path);
     switch (a.typeoffunc.to_ulong())
     {
@@ -517,7 +519,7 @@ void applychange(Pixel***& arr, int col, int row, updatee& a) {
     }
 }
 //loops applying
-void applychangeset(Pixel***& arr, int col, int row, vector<updatee>& changeset) {
+void applychangeset(Pixel*** arr, int col, int row, vector<updatee>& changeset) {
     for (updatee a : changeset) {
         //cout << changeset[0].typeoffunc << endl;
         applychange(arr, col, row, a);
@@ -525,14 +527,16 @@ void applychangeset(Pixel***& arr, int col, int row, vector<updatee>& changeset)
     }
     changeset.clear();
 }
-void checkfor(Pixel***& arr, int col, int row, vector<pair<int, int>>& newupdateset,
+void checkfor(Pixel*** arr, int col, int row, vector<pair<int, int>>& newupdateset,
     vector<funcexunit>& funcs, vector<updatee>& changeset) {
-    for (funcexunit a : funcs) {
+    auto before1 = chrono::high_resolution_clock::now();;
+    auto clockc = chrono::high_resolution_clock::now();;
+    for (int x = 0; x < funcs.size();x++) {
         for (int i = 0; i < col; i++) {
             for (int j = 0; j < row; j++) {
-                if (a.cond(arr, row, col, i, j)) {
+                if (funcs[x].cond(arr, row, col, i, j)) {
                     //cout << "e:: "<< funcs[0].func.x(0) << endl;
-                    saferunup(arr, col, row, i, j, a.func, newupdateset, changeset);
+                    saferunup(arr, col, row, i, j, funcs[x].func, newupdateset, changeset);
                     //cout << "a41: " << static_cast<int>((*(Changei*)changeset[0].a).path) << endl;
                     //cout << "E:: " << funcs[0].func.x(0) << endl;
                 }
@@ -543,6 +547,8 @@ void checkfor(Pixel***& arr, int col, int row, vector<pair<int, int>>& newupdate
         //cout << "E2:: " << funcs[0].func.x(0) << endl;
     }
     //cout << "E3:: " << funcs[0].func.x(0) << endl;
+    auto end = chrono::high_resolution_clock::now();;
+    cout << chrono::duration_cast<chrono::nanoseconds>(end - before1).count() << endl;
     return;
 }
 
