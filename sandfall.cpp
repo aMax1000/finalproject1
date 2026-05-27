@@ -8,6 +8,7 @@
 #include <bit>
 #include <bitset>
 #include <typeinfo>
+#include <chrono>
 #include "basicslib.h"
 #include "safepixel0,3.h"
 
@@ -91,24 +92,47 @@ int main()
     //    intarr.push_back(abbb);
     //}
     //testfun(intarr);
-    clock_t before = clock();
-    int col = 1000;
-    int row = 1000;
-    Air asss;
-    Sand sand;
+    auto before = chrono::high_resolution_clock::now();
+    auto before1 = chrono::high_resolution_clock::now();
+    auto end = chrono::high_resolution_clock::now();
+    int col = 40;
+    int row = 40;
     Pixel*** arr = new Pixel ** [col];
     for (int i = 0; i < col; i++) {
         arr[i] = new Pixel*[row];
     }
     for (int i = 0; i < col; i++) {
         for (int j = 0; j < row; j++) {
-            arr[i][j] = new Air;    
+            Air air;
+            arr[i][j] = &air;    
         }
     }
     for (int i = 0; i < col;i++) {
-        arr[0][i] = new Sand;
+        Sand sand;
+        arr[0][i] = &sand;
     }
-    //cout<< (*(arr[0][9])).getint('t');
+    //for (int i = 0; i < col; i++) {
+    //    Sand sand;
+    //    arr[2][i] = &sand;
+    //}
+    //for (int i = 0; i < col; i++) {
+    //    Sand sand;
+    //    arr[4][i] = &sand;
+    //}
+    //for (int i = 0; i < col; i++) {
+    //    Sand sand;
+    //    arr[6][i] = &sand;
+
+    //}
+    //for (int i = 0; i < col; i++) {
+    //    Sand sand;
+    //    arr[8][i] = &sand;
+    //}
+    //for (int i = 0; i < col; i++) {
+    //    Sand sand;
+    //    arr[10][i] = &sand;
+    //}
+    
     vector<funcexunit> a;
     vector<funcexunit> b;
     funcexunit t;
@@ -124,15 +148,24 @@ int main()
     vector<pair<int, int>> updateset;//unused
     vector<updatee> changeset;
     int i = 0;
+    cout << sizeof(arr[0][0])<<endl;
+    cout << sizeof(*arr[0][0]) << endl;
+    before = chrono::high_resolution_clock::now();;
     while (!gg) {
         
         //cout<<a[0].func.x(0)<<endl;
+        before1 = chrono::high_resolution_clock::now();;
         checkfor(arr, col, row, updateset, a, changeset);
+        end = chrono::high_resolution_clock::now();;
+        cout << "checkfor time:" << chrono::duration_cast<chrono::nanoseconds>(end - before1).count() << endl;
         //printboard(arr, col, row);
         //cout << changeset[0].typeoffunc<<endl;
         //cin >> gg;
         //cout << "a3: " << static_cast<int>((*(Changei*)changeset[0].a).path) << endl;
+        before1 = chrono::high_resolution_clock::now();;
         applychangeset(arr, col, row, changeset);
+        end = chrono::high_resolution_clock::now();
+        cout << "apply time:" << chrono::duration_cast<chrono::nanoseconds>(end - before1).count() << endl;
         //cout << a[0].func.x(0) << endl;
         //cout<<updateset.size();
         updateset.clear();
@@ -140,7 +173,8 @@ int main()
         //    cout << i <<'\n';
         //}
         if (i == 32) {
-            cout << "time:" << static_cast<float>(clock() - before) / CLOCKS_PER_SEC;
+            end = chrono::high_resolution_clock::now();
+            cout << "time:" << chrono::duration_cast<chrono::nanoseconds>(end - before).count() << endl;
         }
         i++;
     }
