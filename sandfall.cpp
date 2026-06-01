@@ -1,52 +1,25 @@
 // sandfall.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
 #include <iostream>
-#include <vector>
 #include <utility>
 #include <Windows.h>
 #include <bit>
 #include <bitset>
 #include <typeinfo>
 #include <chrono>
+#include <array>
+#include <stack>
 #include "basicslib.h"
 #include "safepixel0,3.h"
 
-bool isair2(Pixel*** a, int col, int row, int ay, int ax) {
-    return getvalue(a, col, row, ay + 1, ax)->getint('t') == 'a'
-        ;
-    //or (*getvalue(a, col, row, y+1, x - 1)).getint('t')=='a'
-    //or (*getvalue(a, col, row, y + 1, x + 1)).getint('t') == 'a'
-}
-bool isair(Pixel*** a, int col, int row, int ay, int ax) {
+bool isair(Pixel*** a, int COL, int ROW, int ay, int ax) {
     return (a[ay][ax])->getint('t') == 'a';
 }
-bool issand(Pixel*** a, int col, int row, int ay, int ax) {
+bool issand(Pixel*** a, int COL, int ROW, int ay, int ax) {
     return (a[ay][ax])->getint('t') == 's';
 }
-//bool isairdiag(Pixel** a, int col, int row, int y, int x) {
-//    return (*getvalue(a, col, row, y, x - 1)).getint('t') != 'a' and (a[y][x]).getint('t') == 'a';
-//}
-//bool isairdiag2(Pixel** a, int col, int row, int x, int y) {
-//    return (*getvalue(a, col, row, y, x + 1)).getint('t') != 'a'
-//        and (*getvalue(a, col, row, y, x + 2)).getint('t') != 'a'
-//        and (a[x][y]).getint('t') == 'a';
-//}
-Changei gravity(Pixel* a, Pixel* b) {
-    Changei c;
-    c.path = 't';
-    c.value = 's';
-    return c;
-};
-Changei returngravity(Pixel* a, Pixel* b) {
-    Changei c;
-    c.path = 't';
-    c.value = 'a';
-    return c;
-};
-void printboard(Pixel*** arr, int col, int row) {
-    for (int i = 0; col > i; i++) {
-        for (int j = 0; row > j; j++) {
+void printboard(Pixel*** arr, int COL, int ROW) {
+    for (int i = 0; COL > i; i++) {
+        for (int j = 0; ROW > j; j++) {
             std::cout << static_cast<char>((arr[i][j]->getint('t'))) << ' ';
         }
         std::cout << std::endl;
@@ -84,6 +57,9 @@ void printboard(Pixel*** arr, int col, int row) {
 //    }
 //}
 
+constexpr auto COL = 1000;
+constexpr auto ROW = 1000;
+
 int main()
 {
     //vector<customstr> intarr;
@@ -95,40 +71,52 @@ int main()
     auto before = chrono::high_resolution_clock::now();
     auto before1 = chrono::high_resolution_clock::now();
     auto end = chrono::high_resolution_clock::now();
-    int col = 40;
-    int row = 40;
-    Pixel*** arr = new Pixel ** [col];
-    for (int i = 0; i < col; i++) {
-        arr[i] = new Pixel*[row];
+    Pixel*** arr = new Pixel ** [COL];
+    for (int i = 0; i < COL; i++) {
+        arr[i] = new Pixel*[ROW];
     }
-    for (int i = 0; i < col; i++) {
-        for (int j = 0; j < row; j++) {
+    for (int i = 0; i < COL; i++) {
+        for (int j = 0; j < ROW; j++) {
             Air air;
-            arr[i][j] = &air;    
+            arr[i][j] = new Air;    
         }
     }
-    for (int i = 0; i < col;i++) {
+    for (int i = 0; i < COL;i++) {
         Sand sand;
-        arr[0][i] = &sand;
+        arr[0][i] = new Sand;
     }
-    //for (int i = 0; i < col; i++) {
+    //stack
+    //array<Pixel**,COL> arr1;
+    //for (int i = 0; i < COL; i++) {
+    //    array<Pixel*, ROW> a;
+    //    arr1[i]=a;
+    //}
+    //Pixel*** arr = *&arr1;
+    //Air air[COL][ROW] = {};
+    //for (int i = 0; i < COL; i++) {
+    //    for (int j = 0; j < ROW; j++) {
+    //        arr[i][j] = air[i]+j;    
+    //    }
+    //}
+
+    //for (int i = 0; i < COL; i++) {
     //    Sand sand;
     //    arr[2][i] = &sand;
     //}
-    //for (int i = 0; i < col; i++) {
+    //for (int i = 0; i < COL; i++) {
     //    Sand sand;
     //    arr[4][i] = &sand;
     //}
-    //for (int i = 0; i < col; i++) {
+    //for (int i = 0; i < COL; i++) {
     //    Sand sand;
     //    arr[6][i] = &sand;
 
     //}
-    //for (int i = 0; i < col; i++) {
+    //for (int i = 0; i < COL; i++) {
     //    Sand sand;
     //    arr[8][i] = &sand;
     //}
-    //for (int i = 0; i < col; i++) {
+    //for (int i = 0; i < COL; i++) {
     //    Sand sand;
     //    arr[10][i] = &sand;
     //}
@@ -155,17 +143,17 @@ int main()
         
         //cout<<a[0].func.x(0)<<endl;
         before1 = chrono::high_resolution_clock::now();;
-        checkfor(arr, col, row, updateset, a, changeset);
+        checkfor(arr, COL, ROW, updateset, a, changeset);
         end = chrono::high_resolution_clock::now();;
-        cout << "checkfor time:" << chrono::duration_cast<chrono::nanoseconds>(end - before1).count() << endl;
-        //printboard(arr, col, row);
+        //cout << "checkfor time:" << chrono::duration_cast<chrono::microseconds>(end - before1).count() << endl;
+        //printboard(arr, COL, ROW);
         //cout << changeset[0].typeoffunc<<endl;
         //cin >> gg;
         //cout << "a3: " << static_cast<int>((*(Changei*)changeset[0].a).path) << endl;
         before1 = chrono::high_resolution_clock::now();;
-        applychangeset(arr, col, row, changeset);
+        applychangeset(arr, COL, ROW, changeset);
         end = chrono::high_resolution_clock::now();
-        cout << "apply time:" << chrono::duration_cast<chrono::nanoseconds>(end - before1).count() << endl;
+        //cout << "apply time:" << chrono::duration_cast<chrono::microseconds>(end - before1).count() << endl;
         //cout << a[0].func.x(0) << endl;
         //cout<<updateset.size();
         updateset.clear();
@@ -174,7 +162,7 @@ int main()
         //}
         if (i == 32) {
             end = chrono::high_resolution_clock::now();
-            cout << "time:" << chrono::duration_cast<chrono::nanoseconds>(end - before).count() << endl;
+            cout << "time:" << chrono::duration_cast<chrono::microseconds>(end - before).count() << endl;
         }
         i++;
     }
