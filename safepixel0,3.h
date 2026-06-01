@@ -8,9 +8,20 @@
 #include <any>
 #include "basicslib.h"
 #include <set>
+#include <array>
 using namespace std;
 
 typedef bitset<1> bit;
+
+enum classes {
+    VOIDI,
+    BASICMAT
+};
+vector < pair<classes, pair<int, int>>> typerrdefarr;
+
+
+
+
 //Can disable error messages for some types of "CANNONT FIND ELEMENT" 
 void errp(char type, char path) {
     switch (type)
@@ -118,11 +129,15 @@ public:
 
 
 // Derived classes-materials
-class Sand : public Pixel {
+
+class Void : public Pixel {
+public:
+};
+
+class BasicMat : public Void {
 public:
     float t;
-    Sand() {
-        type = 's';
+    BasicMat() {
         t = 0;
     }
     float getfloat(char a) {
@@ -151,40 +166,23 @@ public:
         return;
     }
 };
-class Air : public Pixel {
-public:
 
-    float tempr = 0;
-    Air() {
-        type = 'a';
-        tempr = 0;
-    }
-    float getfloat(char a) {
-        switch (a)
-        {
-        case('T'):
-            return tempr;
-            break;
-        default:
-            errp(type, a);
 
-            break;
-        }
-        return 0;
-    }
-    void writefloat(char a, float b) {
-        switch (a)
-        {
-        case('T'):
-            tempr = b;
-            break;
-        default:
-            errp(type, a);
-            break;
-        }
+Pixel* typeclasschange(Pixel* a,classes b) {
+    switch (b)
+    {
+    case VOIDI:
+        Void* ne=new Void(a);
+        *ne = *a;
         return;
+        break;
+    case BASICMAT:
+        break;
+    default:
+        break;
     }
-};
+}
+
 
 //transition of cordinates to loop the board
 void cordtrans(int col, int row, int x, int y, int& x1, int& y1) {
@@ -245,8 +243,8 @@ struct Changes {
 typedef Changeb(*ptobf)(Pixel*, Pixel*);
 typedef Changei(*ptoif)(Pixel*, Pixel*);
 typedef Changef(*ptoff)(Pixel*, Pixel*);
-typedef Changes(*ptosf)(Pixel*, Pixel*);
 typedef bool (*conditionchar)(Pixel*, Pixel*);
+typedef bool (*conditionchar1)(Pixel*);
 
 //settings of functions
 struct func2d {
@@ -258,16 +256,24 @@ struct func2d {
 };
 
 //object to run array of functions with settings
+template <int Size>
 class funcarr {
 private:
     union {
         ptobf b;
         ptoif i;
         ptoff f;
-        ptosf s;
     }*arr = nullptr;
     func2d* settingarr = nullptr;
 public:
+    funcarr() {
+        array < union {
+            ptobf b;
+            ptoif i;
+            ptoff f;
+        }, Size > arr;
+        array <func2d, Size> settingarr;
+    }
     int size1 = 0;
     //ДЕКОНСТРУКТОР РАБОТАЕТ 2 РАЗА ЕСЛИ ОБЬЕКТ В ВЕКТОРЕ
     //~funcarr() {
@@ -280,8 +286,7 @@ public:
     //    }
     //}
     void addell(ptobf func, int x, int y, vector<pair<int, int>>& toupdates, vector<pair<conditionchar, pair<int, int>>>& condition) {
-        resize(arr, size1, size1 + 1);
-        resize(settingarr, size1, size1 + 1);
+        if(size1<Size){
         func2d a;
         a.condition = condition;
         a.toupdates = toupdates;
@@ -289,115 +294,137 @@ public:
         a.y = y;
         settingarr[size1] = a;
         arr[size1].b = func;
-        size1++;
         settingarr[size1].typef = 0;
+        size1++;
+        }
+        else {
+            cout << "FUNCARR INDEX OVERFLOW";
+        }
     }
     void addell(ptoif func, int x, int y, vector<pair<int, int>>& toupdates, vector<pair<conditionchar, pair<int, int>>>& condition) {
-        resize(arr, size1, size1 + 1);
-        resize(settingarr, size1, size1 + 1);
-        func2d a;
-        a.condition = condition;
-        a.toupdates = toupdates;
-        a.x = x;
-        a.y = y;
-        settingarr[size1] = a;
-        arr[size1].i = func;
-        settingarr[size1].typef = 1;
-        //cout << settingarr[size1].x << endl;
-        size1++;
+        if (size1 < Size) {
+            func2d a;
+            a.condition = condition;
+            a.toupdates = toupdates;
+            a.x = x;
+            a.y = y;
+            settingarr[size1] = a;
+            arr[size1].i = func;
+            settingarr[size1].typef = 1;
+            //cout << settingarr[size1].x << endl;
+            size1++;
+        }
+        else {
+            cout << "FUNCARR INDEX OVERFLOW";
+        }
 
     }
     void addell(ptoff func, int x, int y, vector<pair<int, int>>& toupdates, vector<pair<conditionchar, pair<int, int>>>& condition) {
-        resize(arr, size1, size1 + 1);
-        resize(settingarr, size1, size1 + 1);
-        func2d a;
-        a.condition = condition;
-        a.toupdates = toupdates;
-        a.x = x;
-        a.y = y;
-        settingarr[size1] = a;
-        arr[size1].f = func;
-        size1++;
-        settingarr[size1].typef = 2;
+        if (size1 < Size) {
+            func2d a;
+            a.condition = condition;
+            a.toupdates = toupdates;
+            a.x = x;
+            a.y = y;
+            settingarr[size1] = a;
+            arr[size1].f = func;
+            settingarr[size1].typef = 2;
+            size1++;
+        }
+        else {
+            cout << "FUNCARR INDEX OVERFLOW";
+        }
     }
-    void addell(ptosf func, int x, int y, vector<pair<int, int>>& toupdates, vector<pair<conditionchar, pair<int, int>>>& condition) {
-        resize(arr, size1, size1 + 1);
-        resize(settingarr, size1, size1 + 1);
-        func2d a;
-        a.condition = condition;
-        a.toupdates = toupdates;
-        a.x = x;
-        a.y = y;
-        settingarr[size1] = a;
-        arr[size1].s = func;
-        size1++;
-        settingarr[size1].typef = 3;
+    void addell(int x, int y, vector<pair<int, int>>& toupdates, vector<pair<conditionchar, pair<int, int>>>& condition) {
+        if (size1 < Size) {
+            func2d a;
+            a.condition = condition;
+            a.toupdates = toupdates;
+            a.x = x;
+            a.y = y;
+            settingarr[size1] = a;
+            //arr[size1].s = nullptr;
+            settingarr[size1].typef = 3;
+            size1++;
+        }
+        else {
+            cout << "FUNCARR INDEX OVERFLOW";
+        }
     }
+    void safecheck() {
+        if (size1 < Size) {
+            cout << "FUNCARR ISN`T FULL\n";
+        }
+        else {
+            cout <<"size check successful\n"
+        }
+    }
+
     int size() {
         return size1;
     };
     bitset<2> typef(int i) {
-        if (i < size1) {
+        if (i < Size) {
             return (settingarr[i].typef);
         }
         else {
-            cout << "ERROR OUT OF INDEX X";
+            cout << "ERROR OUT OF INDEX X\n";
         }
 
     };
     int x(int i) {
-        if (i < size1) {
+        if (i < Size) {
             //cout << "n " << settingarr[i].x << endl;
             return (settingarr[i].x);
 
         }
         else {
-            cout << "ERROR OUT OF INDEX X";
+            cout << "ERROR OUT OF INDEX X\n";
         }
 
     };
     int y(int i) {
-        if (i < size1) {
+        if (i < Size) {
             return (settingarr[i].y);
         }
         else {
-            cout << "ERROR OUT OF INDEX Y";
+            cout << "ERROR OUT OF INDEX Y\n";
         }
     };
     ptobf funcb(int i) {
-        if (i < size1) {
+        if (i < Size) {
             return arr[i].b;
         }
         else {
-            cout << "ERROR OUT OF INDEX FUNCB";
+            cout << "ERROR OUT OF INDEX FUNCB\n";
         }
     };
     ptoif funci(int i) {
-        if (i < size1) {
+        if (i < Size) {
             return arr[i].i;
         }
         else {
-            cout << "ERROR OUT OF INDEX FUNCB";
+            cout << "ERROR OUT OF INDEX FUNCI\n";
         }
     };
     ptoff funcf(int i) {
-        if (i < size1) {
+        if (i < Size) {
             return arr[i].f;
         }
         else {
-            cout << "ERROR OUT OF INDEX FUNCB";
+            cout << "ERROR OUT OF INDEX FUNCF\n";
         }
     };
-    ptosf funcs(int i) {
-        if (i < size1) {
-            return arr[i].s;
-        }
-        else {
-            cout << "ERROR OUT OF INDEX FUNCB";
-        }
-    };
+    //ptosf funcs(int i) {
+    //    if (i < size1) {
+    //        return arr[i].s;
+    //    }
+    //    else {
+    //        cout << "ERROR OUT OF INDEX FUNCB";
+    //    }
+    //};
     vector<pair<conditionchar, pair<int, int>>>& cond(int i) {
-        if (i < size1) {
+        if (i < Size) {
             return (settingarr[i].condition);
         }
         else {
@@ -405,7 +432,7 @@ public:
         }
     };
     vector<pair<int, int>>& doupdate(int i) {
-        if (i < size1) {
+        if (i < Size) {
             return (settingarr[i].toupdates);
         }
         else {
@@ -432,8 +459,9 @@ struct updatee {
 
 bool runcondarr(vector<pair<conditionchar, pair<int, int>>>& a, Pixel*** arr, int col, int row, int x, int y) {
     for (pair<conditionchar, pair<int, int>> i : a) {
-        i.first(arr[])
+        if(!i.first(arr[i.second.first][i.second.second], arr[x][y])) return false;
     }
+    return true;
 }
 
 
@@ -449,7 +477,7 @@ void saferunup(Pixel*** arr, int col, int row, int x, int y, funcarr& a,
     for (int i = 0; d > i; i++) {
         //cout << "q:: " << a.x(0) << endl;
         cordtrans(col, row, x + a.x(i), y + a.y(i), upd.x, upd.y);
-        if (a.cond(i)(arr, col, row, upd.x, upd.y)) {
+        if (runcondarr(a.cond(i),arr, col, row, upd.x, upd.y)) {
             switch (a.typeof(i))
             {
             case(0):
@@ -466,7 +494,7 @@ void saferunup(Pixel*** arr, int col, int row, int x, int y, funcarr& a,
                 upd.typeoffunc = 2;
                 break;
             case(3):
-                upd.data.s = (a.funcs(i))(arr[upd.x][upd.y], initialpixel);
+                upd.data.s = { upd.x, upd.y };
                 upd.typeoffunc = 3;
                 break;
             default:
@@ -474,8 +502,10 @@ void saferunup(Pixel*** arr, int col, int row, int x, int y, funcarr& a,
                 break;
             }
 
-            for (int j:nuscords) {
-                newupdateset[j].push_back({upd.x,upd.y});
+            for (pair<int, int> k : a.doupdate(i)) {
+                for(int j : nuscords){
+                    newupdateset[j].push_back({upd.x+k.first,upd.y+k.second});
+                }
             }
             //cout << "a: " << static_cast<int>(in.path)<<endl;
             //cout << "a2: " << static_cast<int>((*(Changei*)b.a).path)<<endl;
@@ -490,26 +520,12 @@ void saferunup(Pixel*** arr, int col, int row, int x, int y, funcarr& a,
 }
 //function with condition to trigger it 
 struct funcexunit {
+    vector<int>& nuscords;
     funcarr func;
-    conditionchar cond;
-    void addell(funcarr& func1, conditionchar cond1) {
-        func = func1;
-        cond = cond1;
-    }
+    conditionchar1 cond1;
 };
 //checking for target pixel paramiters among Pixels marked to update
-//void update(Pixel*** arr, int col, int row,
-//    vector<pair<int, int>>& updateset, vector<pair<int, int>>& newupdateset,
-//    vector<funcexunit>& funcs, vector<updatee>& changeset) {
-//    for (funcexunit a : funcs) {
-//        for (pair<int, int> n : updateset) {
-//            if (a.cond(arr, row, col, n.first, n.second)) {
-//                saferunup(arr, col, row, n.first, n.second, a.func, newupdateset, changeset);
-//            }
-//        }
-//    }
-//    return;
-//}
+
 
 //applying 1 change io 1 pixel
 void applychange(Pixel*** arr, int col, int row, updatee& a) {
@@ -517,18 +533,19 @@ void applychange(Pixel*** arr, int col, int row, updatee& a) {
     switch (a.typeoffunc.to_ulong())
     {
     case(0):
-        (*arr[a.x][a.y]).writebit((a.data.b).path, (a.data.b).value);
+        (arr[a.x][a.y])->writebit((a.data.b).path, (a.data.b).value);
         break;
     case(1):
-        (*arr[a.x][a.y]).writeint((a.data.i).path, (a.data.i).value);
+        (arr[a.x][a.y])->writeint((a.data.i).path, (a.data.i).value);
         break;
     case(2):
-        (*arr[a.x][a.y]).writefloat((a.data.f).path, (a.data.f).value);
+        (arr[a.x][a.y])->writefloat((a.data.f).path, (a.data.f).value);
         break;
     case(3):
-        swap(arr[a.x][a.y], arr[(a.data.s).x][(a.data.s).y]);
+        swap(arr[a.data.s.x][a.data.s.y], arr[a.x][a.y]);
         break;
     default:
+        cout << "ERROR AT APPLYING CHANGE VALUE";
         break;
     }
 }
@@ -551,16 +568,15 @@ void applychangeset(Pixel*** arr, int col, int row, vector<updatee>& changeset) 
     }
     changeset.clear();
 }
-void checkfor(Pixel*** arr, int col, int row, vector<newupdatesett>& newupdateset, vector<int>& nuscords,
-    vector<funcexunit>& funcs, vector<updatee>& changeset) {
+void checkfor(Pixel*** arr, int col, int row, vector<newupdatesett>& newupdateset,
+    funcexunit& funcs, vector<updatee>& changeset) {
     auto before1 = chrono::high_resolution_clock::now();;
     auto clockc = chrono::high_resolution_clock::now();;
-    for (int x = 0; x < funcs.size();x++) {
         for (int i = 0; i < col; i++) {
             for (int j = 0; j < row; j++) {
-                if (funcs[x].cond(arr, row, col, i, j)) {
+                if (funcs.cond1(arr[i][j])) {
                     //cout << "e:: "<< funcs[0].func.x(0) << endl;
-                    saferunup(arr, col, row, i, j, funcs[x].func, newupdateset, nuscords, changeset);
+                    saferunup(arr, col, row, i, j, funcs.func, newupdateset, funcs.nuscords, changeset);
                     //cout << "a41: " << static_cast<int>((*(Changei*)changeset[0].a).path) << endl;
                     //cout << "E:: " << funcs[0].func.x(0) << endl;
                 }
@@ -569,13 +585,21 @@ void checkfor(Pixel*** arr, int col, int row, vector<newupdatesett>& newupdatese
         }
         //cout << "a44: " << static_cast<int>((*(Changei*)changeset[0].a).path) << endl;
         //cout << "E2:: " << funcs[0].func.x(0) << endl;
-    }
     //cout << "E3:: " << funcs[0].func.x(0) << endl;
     auto end = chrono::high_resolution_clock::now();;
     //cout << chrono::duration_cast<chrono::microseconds>(end - before1).count() << endl;
     return;
 }
-
+void update(Pixel*** arr, int col, int row,
+    vector<pair<int, int>>& updateset, vector<newupdatesett>& newupdateset,
+    funcexunit& funcs, vector<updatee>& changeset) {
+            for (pair<int, int> n : updateset) {
+                if (funcs.cond1(arr[n.first][n.second])) {
+                    saferunup(arr, col, row, n.first, n.second, funcs.func, newupdateset, funcs.nuscords, changeset);
+                }
+            }
+    return;
+}
 
 
 //template<typename T>
