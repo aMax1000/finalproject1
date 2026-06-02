@@ -6,18 +6,12 @@
 #include <bitset>
 #include <typeinfo>
 #include <any>
-#include "basicslib.h"
+
 #include <set>
 #include <array>
+#include "basicslib.h"
+#include "constdata.h"
 using namespace std;
-
-typedef bitset<1> bit;
-
-enum classes {
-    VOIDI,
-    BASICMAT
-};
-vector < pair<classes, pair<int, int>>> typerrdefarr;
 
 
 
@@ -27,7 +21,7 @@ void errp(char type, char path) {
     switch (type)
     {
     default:
-        cout << "CANNONT FIND ELEMENT: " << path << " AT TYPE " << type << endl;
+        cout << "CANNONT FIND ELEMENT: " << path <<" AT TYPE " << type << endl;
         break;
     }
 }
@@ -38,7 +32,10 @@ class Pixel {
 protected:
 
 public:
-    char type;
+
+    
+
+    matreals type;
     char gettype() {
         return type;
     }
@@ -51,7 +48,7 @@ public:
             break;
         }
     }
-    void writebit(char a, bit b) {
+    void writebit(variableb a, bit b) {
         switch (a)
         {
         default:
@@ -72,11 +69,14 @@ public:
             break;
         }
     }
-    void writeint(char a, int b) {
+    void writeint(variablei a, int b) {
         switch (a)
         {
-        case 't':
-            type = b;
+        case TYPE:
+            if (consti(type, TYPE) != consti(static_cast<matreals>(b), TYPE)) {
+                rewrite_type(this, static_cast<classes>(consti(static_cast<matreals>(b), TYPE)));
+            }
+            type = static_cast<matreals>(b);
             break;
         default:
             errp(type, a);
@@ -127,7 +127,6 @@ public:
 //    return;
 //}
 
-
 // Derived classes-materials
 
 class Void : public Pixel {
@@ -168,21 +167,25 @@ public:
 };
 
 
-Pixel* typeclasschange(Pixel* a,classes b) {
-    switch (b)
+void rewrite_type(Pixel* a, classes type) {
+    delete a;
+    switch (type)
     {
-    case VOIDI:
-        Void* ne=new Void(a);
-        *ne = *a;
+    case VOIDC:
+        a = new Void;
         return;
-        break;
     case BASICMAT:
-        break;
+        a = new BasicMat;
+        return;
+    case COUNDUCTOR:
+        return;
+    case PARTICLE:
+        return;
     default:
-        break;
+        cout << "ERROR AT REWRITING CLASS";
+        return;
     }
 }
-
 
 //transition of cordinates to loop the board
 void cordtrans(int col, int row, int x, int y, int& x1, int& y1) {
@@ -256,7 +259,7 @@ struct func2d {
 };
 
 //object to run array of functions with settings
-template <int Size>
+
 class funcarr {
 private:
     union {
@@ -266,13 +269,14 @@ private:
     }*arr = nullptr;
     func2d* settingarr = nullptr;
 public:
+    template <int Size>
     funcarr() {
-        array < union {
+        union {
             ptobf b;
             ptoif i;
             ptoff f;
-        }, Size > arr;
-        array <func2d, Size> settingarr;
+        }[Size] arr;
+        func2d[Size] settingarr;
     }
     int size1 = 0;
     //ДЕКОНСТРУКТОР РАБОТАЕТ 2 РАЗА ЕСЛИ ОБЬЕКТ В ВЕКТОРЕ
@@ -286,7 +290,6 @@ public:
     //    }
     //}
     void addell(ptobf func, int x, int y, vector<pair<int, int>>& toupdates, vector<pair<conditionchar, pair<int, int>>>& condition) {
-        if(size1<Size){
         func2d a;
         a.condition = condition;
         a.toupdates = toupdates;
@@ -296,13 +299,8 @@ public:
         arr[size1].b = func;
         settingarr[size1].typef = 0;
         size1++;
-        }
-        else {
-            cout << "FUNCARR INDEX OVERFLOW";
-        }
     }
     void addell(ptoif func, int x, int y, vector<pair<int, int>>& toupdates, vector<pair<conditionchar, pair<int, int>>>& condition) {
-        if (size1 < Size) {
             func2d a;
             a.condition = condition;
             a.toupdates = toupdates;
@@ -313,14 +311,9 @@ public:
             settingarr[size1].typef = 1;
             //cout << settingarr[size1].x << endl;
             size1++;
-        }
-        else {
-            cout << "FUNCARR INDEX OVERFLOW";
-        }
 
     }
     void addell(ptoff func, int x, int y, vector<pair<int, int>>& toupdates, vector<pair<conditionchar, pair<int, int>>>& condition) {
-        if (size1 < Size) {
             func2d a;
             a.condition = condition;
             a.toupdates = toupdates;
@@ -330,13 +323,8 @@ public:
             arr[size1].f = func;
             settingarr[size1].typef = 2;
             size1++;
-        }
-        else {
-            cout << "FUNCARR INDEX OVERFLOW";
-        }
     }
     void addell(int x, int y, vector<pair<int, int>>& toupdates, vector<pair<conditionchar, pair<int, int>>>& condition) {
-        if (size1 < Size) {
             func2d a;
             a.condition = condition;
             a.toupdates = toupdates;
@@ -346,25 +334,13 @@ public:
             //arr[size1].s = nullptr;
             settingarr[size1].typef = 3;
             size1++;
-        }
-        else {
-            cout << "FUNCARR INDEX OVERFLOW";
-        }
-    }
-    void safecheck() {
-        if (size1 < Size) {
-            cout << "FUNCARR ISN`T FULL\n";
-        }
-        else {
-            cout <<"size check successful\n"
-        }
     }
 
     int size() {
         return size1;
     };
     bitset<2> typef(int i) {
-        if (i < Size) {
+        if (i < size1) {
             return (settingarr[i].typef);
         }
         else {
@@ -373,7 +349,7 @@ public:
 
     };
     int x(int i) {
-        if (i < Size) {
+        if (i < size1) {
             //cout << "n " << settingarr[i].x << endl;
             return (settingarr[i].x);
 
@@ -384,7 +360,7 @@ public:
 
     };
     int y(int i) {
-        if (i < Size) {
+        if (i < size1) {
             return (settingarr[i].y);
         }
         else {
@@ -392,7 +368,7 @@ public:
         }
     };
     ptobf funcb(int i) {
-        if (i < Size) {
+        if (i < size1) {
             return arr[i].b;
         }
         else {
@@ -400,7 +376,7 @@ public:
         }
     };
     ptoif funci(int i) {
-        if (i < Size) {
+        if (i < size1) {
             return arr[i].i;
         }
         else {
@@ -408,7 +384,7 @@ public:
         }
     };
     ptoff funcf(int i) {
-        if (i < Size) {
+        if (i < size1) {
             return arr[i].f;
         }
         else {
@@ -424,7 +400,7 @@ public:
     //    }
     //};
     vector<pair<conditionchar, pair<int, int>>>& cond(int i) {
-        if (i < Size) {
+        if (i < size1) {
             return (settingarr[i].condition);
         }
         else {
@@ -432,7 +408,7 @@ public:
         }
     };
     vector<pair<int, int>>& doupdate(int i) {
-        if (i < Size) {
+        if (i < size1) {
             return (settingarr[i].toupdates);
         }
         else {
@@ -447,7 +423,7 @@ public:
 
 //derivative of Pixel with coords of change
 struct updatee {
-    int y,x;
+    int x,y;
     bitset<2> typeoffunc;
     union {
         Changeb b;
