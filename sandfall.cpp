@@ -10,17 +10,16 @@
 #include <stack>
 #include "basicslib.h"
 #include "safepixel0,3.h"
-
-bool isair(Pixel*** a, int COL, int ROW, int ay, int ax) {
-    return (a[ay][ax])->getint('t') == 'a';
+bool isair(Pixel* a, Pixel* b) {
+    return (a)->getint(TYPEV) == VOIDM;
 }
-bool issand(Pixel*** a, int COL, int ROW, int ay, int ax) {
-    return (a[ay][ax])->getint('t') == 's';
+bool issand1(Pixel* a) {
+    return (a)->getint(TYPEV) == SAND;
 }
 void printboard(Pixel*** arr, int COL, int ROW) {
     for (int i = 0; COL > i; i++) {
         for (int j = 0; ROW > j; j++) {
-            std::cout << static_cast<char>((arr[i][j]->getint('t'))) << ' ';
+            std::cout << static_cast<char>((arr[i][j]->getint(TYPEV))) << ' ';
         }
         std::cout << std::endl;
     }
@@ -77,13 +76,14 @@ int main()
     }
     for (int i = 0; i < COL; i++) {
         for (int j = 0; j < ROW; j++) {
-            Air air;
-            arr[i][j] = new Air;    
+            arr[i][j] = new Void;    
         }
     }
-    for (int i = 0; i < COL;i++) {
-        Sand sand;
-        arr[0][i] = new Sand;
+    for(int i=0;i<2;i+=2){
+    for (int j = 0; j < ROW;j++) {
+        arr[i][j] = new BasicMat;
+        arr[i][j]->type = SAND;
+    }
     }
     //stack
     //array<Pixel**,COL> arr1;
@@ -120,46 +120,47 @@ int main()
     //    Sand sand;
     //    arr[10][i] = &sand;
     //}
-    
-    vector<funcexunit> a;
-    vector<funcexunit> b;
-    funcexunit t;
+    vector<pair<int, int>> cross;
+    cross.push_back({ 0, 0 });
+    cross.push_back({ 1, 0 });
+    cross.push_back({ -1, 0 });
+    cross.push_back({ 0, 1 });
+    cross.push_back({ 0, -1 });
+    vector<pair<conditionchar, pair<int, int>>> isaircheck;
+    isaircheck.push_back({ isair,{1,0} });
+    funcarr<1> tempwrite;
+    tempwrite.addell(1, 0, cross, isaircheck,true,false);
+    funcexunit<1> t;
+    t.func = tempwrite;
+    t.nuscords = { FALLING };
+    t.cond1 = issand1;
     int gg = 0;
-    funcarr tempwrite;
-    tempwrite.addell(gravity, 1, 0, true, isair);
-    tempwrite.addell(returngravity, 0, 0, true, isair2);
+
     //tempwrite.addell(gravity, 1, 1, true, isairdiag);
     //tempwrite.addell(gravity, 1, -1, true, isairdiag2);
-    t.addell(tempwrite, issand);
-    a.push_back(t);
-    b.push_back(t);
-    vector<pair<int, int>> updateset;//unused
+    pairset updateset(10,COL,ROW);
+    for (int i = 0; i < 10; i++) {
+        updateset.os.push_back({});
+    }
+
     vector<updatee> changeset;
     int i = 0;
-    cout << sizeof(arr[0][0])<<endl;
-    cout << sizeof(*arr[0][0]) << endl;
+    //cout << sizeof(arr[0][0])<<endl;
+    //cout << sizeof(*arr[0][0]) << endl;
     before = chrono::high_resolution_clock::now();;
     while (!gg) {
-        
         //cout<<a[0].func.x(0)<<endl;
         before1 = chrono::high_resolution_clock::now();;
-        checkfor(arr, COL, ROW, updateset, a, changeset);
+        checkfor(arr, COL, ROW, updateset.ns, t, changeset);
+        //cout<<changeset.size();
         end = chrono::high_resolution_clock::now();;
-        //cout << "checkfor time:" << chrono::duration_cast<chrono::microseconds>(end - before1).count() << endl;
         //printboard(arr, COL, ROW);
-        //cout << changeset[0].typeoffunc<<endl;
-        //cin >> gg;
-        //cout << "a3: " << static_cast<int>((*(Changei*)changeset[0].a).path) << endl;
-        before1 = chrono::high_resolution_clock::now();;
+        //cout <<endl<< changeset.size()<<endl;
+        before1 = chrono::high_resolution_clock::now();
         applychangeset(arr, COL, ROW, changeset);
         end = chrono::high_resolution_clock::now();
-        //cout << "apply time:" << chrono::duration_cast<chrono::microseconds>(end - before1).count() << endl;
-        //cout << a[0].func.x(0) << endl;
-        //cout<<updateset.size();
-        updateset.clear();
-        //if (log2(i) == floor(log2(i))) {
-        //    cout << i <<'\n';
-        //}
+        updateset.refresh();
+        //cin >> gg;
         if (i == 32) {
             end = chrono::high_resolution_clock::now();
             cout << "time:" << chrono::duration_cast<chrono::microseconds>(end - before).count() << endl;
