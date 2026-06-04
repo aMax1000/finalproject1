@@ -33,13 +33,9 @@ protected:
 
 public:
 
-    
-
     matreals type;
-    char gettype() {
-        return type;
-    }
-    bit getbit(variableb a) {
+
+    bool getbit(variableb a) {
         switch (a)
         {
         default:
@@ -48,7 +44,7 @@ public:
             break;
         }
     }
-    void writebit(variableb a, bit b) {
+    void writebit(variableb a, bool b) {
         switch (a)
         {
         default:
@@ -231,7 +227,7 @@ bool truec(Pixel* a, Pixel* b) {
 }
 //path and value to change on Pixel
 struct Changeb {
-    bit value;
+    bool value;
     variableb path;
 };
 struct Changei {
@@ -260,9 +256,9 @@ struct func2d {
     vector<pair<int, int>> toupdates;
     int x;
     int y;
-    bitset<2> typef;
-    bit breakontrue;
-    bit instantapply;
+    unsigned char typef;
+    bool breakontrue;
+    bool instantapply;
 };
 
 //object to run array of functions with settings
@@ -290,7 +286,7 @@ public:
     //        delete[] settingarr;
     //    }
     //}
-    void addell(ptobf func, int x, int y, vector<pair<int, int>> toupdates, vector<pair<conditionchar, pair<int, int>>> condition,bit breakontrue1, bit instantapply1) {
+    void addell(ptobf func, int x, int y, vector<pair<int, int>> toupdates, vector<pair<conditionchar, pair<int, int>>> condition,bool breakontrue1, bool instantapply1) {
         func2d a;
         a.condition = condition;
         a.toupdates = toupdates;
@@ -303,7 +299,7 @@ public:
         settingarr[size1].typef = 0;
         size1++;
     }
-    void addell(ptoif func, int x, int y, vector<pair<int, int>> toupdates, vector<pair<conditionchar, pair<int, int>>> condition, bit breakontrue1, bit instantapply1) {
+    void addell(ptoif func, int x, int y, vector<pair<int, int>> toupdates, vector<pair<conditionchar, pair<int, int>>> condition, bool breakontrue1, bool instantapply1) {
             func2d a;
             a.condition = condition;
             a.toupdates = toupdates;
@@ -318,7 +314,7 @@ public:
             size1++;
 
     }
-    void addell(ptoff func, int x, int y, vector<pair<int, int>> toupdates, vector<pair<conditionchar, pair<int, int>>> condition, bit breakontrue1, bit instantapply1) {
+    void addell(ptoff func, int x, int y, vector<pair<int, int>> toupdates, vector<pair<conditionchar, pair<int, int>>> condition, bool breakontrue1, bool instantapply1) {
             func2d a;
             a.condition = condition;
             a.toupdates = toupdates;
@@ -331,7 +327,7 @@ public:
             settingarr.at(size1).typef = 2;
             size1++;
     }
-    void addell(int x, int y, vector<pair<int, int>> toupdates, vector<pair<conditionchar, pair<int, int>>> condition, bit breakontrue1, bit instantapply1) {
+    void addell(int x, int y, vector<pair<int, int>> toupdates, vector<pair<conditionchar, pair<int, int>>> condition, bool breakontrue1, bool instantapply1) {
             func2d a;
             a.condition = condition;
             a.toupdates = toupdates;
@@ -348,7 +344,7 @@ public:
     int size() {
         return size1;
     };
-    bitset<2> typef(int i) {
+    unsigned char typef(int i) {
         if (i < size1) {
             return (settingarr.at(i).typef);
         }
@@ -426,7 +422,7 @@ public:
     };
     int typeof(int i) {
         if (i < size1) {
-            return settingarr[i].typef.to_ulong();
+            return settingarr[i].typef;
         }
         else {
             cout << "ERROR OUT OF INDEX TYPEOF";
@@ -434,7 +430,7 @@ public:
     }
     bool breakontrue(int i) {
         if (i < size1) {
-            return settingarr[i].breakontrue.to_ulong();
+            return settingarr[i].breakontrue;
         }
         else {
             cout << "ERROR OUT OF INDEX breakontrue";
@@ -442,7 +438,7 @@ public:
     }
     bool instantapply(int i) {
         if (i < size1) {
-            return settingarr[i].instantapply.to_ulong();
+            return settingarr[i].instantapply;
         }
         else {
             cout << "ERROR OUT OF INDEX instantapply";
@@ -454,7 +450,7 @@ public:
 //derivative of Pixel with coords of change
 struct updatee {
     int x,y;
-    bitset<2> typeoffunc;
+    unsigned char typeoffunc;
     union {
         Changeb b;
         Changei i;
@@ -463,6 +459,7 @@ struct updatee {
     } data;
 };
 
+//running array of if`s
 bool runcondarr(vector<pair<conditionchar, pair<int, int>>>& a, Pixel*** arr, int col, int row, int x, int y) {
     for (pair<conditionchar, pair<int, int>> i : a) {
         //cout << "g4";
@@ -472,6 +469,7 @@ bool runcondarr(vector<pair<conditionchar, pair<int, int>>>& a, Pixel*** arr, in
     return true;
 }
 
+//structure for adding updates(not linked to "updatee") for next step
 struct newupdatesett {
     newupdatesett(int col,int row) {
         for(int i=0;i<col;i++){
@@ -498,12 +496,40 @@ struct newupdatesett {
         arr.clear();
     }
 };
+//pair of newupdateset and old updateset
+struct pairset {
+
+    vector<newupdatesett> ns;
+    vector<vector< pair<int, int>>> os;
+    pairset(int len, int col, int row) {
+        for (int i = 0; i < len; i++) {
+            newupdatesett* a = new newupdatesett(col, row);
+            ns.push_back(*a);
+        }
+    }
+    void refresh() {
+        auto before = chrono::high_resolution_clock::now();
+
+        //cout << "aboba2";
+        for (int i = 0; i < ns.size(); i++) {
+            //cout << "aboba3";
+            os[i] = ns[i].arr;
+            //cout << "aboba31";
+        }
+        //cout << "aboba4";
+        for (int i = 0; i < ns.size(); i++) {
+            ns[i].clear();
+        }
+        auto end = chrono::high_resolution_clock::now();
+        cout << "time1:" << chrono::duration_cast<chrono::microseconds>(end - before).count() << endl;
+    }
+};
 
 
 //applying 1 change io 1 pixel
 void applychange(Pixel***& arr, int col, int row, updatee& a) {
     //cout <<"A: " <<static_cast<int>((*(Changei*)a.a).path);
-    switch (a.typeoffunc.to_ulong())
+    switch (a.typeoffunc)
     {
     case(0):
         (arr[a.x][a.y])->writebit((a.data.b).path, (a.data.b).value);
@@ -593,6 +619,7 @@ void saferunup(Pixel*** arr, int col, int row, int x, int y, funcarr<Size>& a,
     //before1+=(clock()- before2);
     return;
 }
+
 //function with condition to trigger it 
 template<int Size>
 struct funcexunit {
@@ -614,6 +641,8 @@ void applychangeset(Pixel*** arr, int col, int row, vector<updatee>& changeset) 
     }
     changeset.clear();
 }
+
+//checking all of board for condition
 template <int Size>
 void checkfor(Pixel*** arr, int col, int row, vector<newupdatesett>& newupdateset,
     funcexunit<Size>& funcs, vector<updatee>& changeset) {
@@ -638,34 +667,8 @@ void checkfor(Pixel*** arr, int col, int row, vector<newupdatesett>& newupdatese
     //cout << chrono::duration_cast<chrono::microseconds>(end - before1).count() << endl;
     return;
 }
-struct pairset {
 
-    vector<newupdatesett> ns;
-    vector<vector< pair<int, int>>> os;
-    pairset(int len,int col,int row) {
-        for (int i = 0; i < len; i++) {
-            newupdatesett* a = new newupdatesett(col,row);
-            ns.push_back(*a);
-        }
-    }
-    void refresh() {
-        //cout << "aboba";
-        for (int i = 0; i < os.size(); i++) {
-            os[i].clear();
-        }
-
-        //cout << "aboba2";
-        for (int i = 0; i < ns.size();i++) {
-            //cout << "aboba3";
-            os[i] = ns[i].arr;
-            //cout << "aboba31";
-        }
-        //cout << "aboba4";
-        for (int i = 0; i < ns.size(); i++) {
-            ns[i].clear();
-        }
-    }
-};
+//checking only old updatesets for condition
 template <int Size>
 void update(Pixel*** arr, int col, int row,
     pairset& pairupdateset, vector<updetesets>& whatupdetesetuse,
