@@ -56,11 +56,12 @@ void printboard(Pixel*** arr, int COL, int ROW) {
 //    }
 //}
 
-constexpr auto COL = 1000;
-constexpr auto ROW = 1000;
+int COL = pow(2,10);
+int ROW = pow(2,10);
 
 int main()
 {
+    setmasks(COL, ROW);
     //vector<customstr> intarr;
     //customstr abbb;
     //for (int i = 0; i < 5; i++) {
@@ -79,7 +80,7 @@ int main()
             arr[i][j] = new Void;    
         }
     }
-    for(int i=0;i<2;i+=2){
+    for(int i=0;i<COL;i+=2){
     for (int j = 0; j < ROW;j++) {
         arr[i][j] = new BasicMat;
         arr[i][j]->type = SAND;
@@ -129,7 +130,8 @@ int main()
     vector<pair<conditionchar, pair<int, int>>> isaircheck;
     isaircheck.push_back({ isair,{1,0} });
     funcarr<1> tempwrite;
-    tempwrite.addell(1, 0, cross, isaircheck,true,false);
+    tempwrite.doupdatesg(cross);
+    tempwrite.addell(1, 0, {}, isaircheck, true, false);
     funcexunit<1> t;
     t.func = tempwrite;
     t.nuscords = { FALLING };
@@ -142,16 +144,19 @@ int main()
     for (int i = 0; i < 10; i++) {
         updateset.os.push_back({});
     }
-
+    vector<updatesets> updatesets;
+    updatesets.push_back(FALLING);
     vector<updatee> changeset;
     int i = 0;
     //cout << sizeof(arr[0][0])<<endl;
     //cout << sizeof(*arr[0][0]) << endl;
     before = chrono::high_resolution_clock::now();;
+    checkfor(arr, COL, ROW, updateset.ns, t, changeset);
     while (!gg) {
         //cout<<a[0].func.x(0)<<endl;
         before1 = chrono::high_resolution_clock::now();;
-        checkfor(arr, COL, ROW, updateset.ns, t, changeset);
+        update(arr, COL, ROW, updateset, updatesets, t, changeset);
+        
         //cout<<changeset.size();
         end = chrono::high_resolution_clock::now();;
         //printboard(arr, COL, ROW);
