@@ -56,8 +56,8 @@ void printboard(Pixel*** arr, int COL, int ROW) {
 //    }
 //}
 
-int COL = pow(2,10);
-int ROW = pow(2,10);
+int COL = pow(2,4);
+int ROW = pow(2,4);
 
 int main()
 {
@@ -121,17 +121,27 @@ int main()
     //    Sand sand;
     //    arr[10][i] = &sand;
     //}
-    vector<pair<int, int>> cross;
+
+    vector<pair<int,int>> cross;
+    vector<updatesets> c = { ELECTRISITY,FALLING };
+    vector<updatesets> b= { FALLING };
+    vector<vector<updatesets>> g;
+    g.push_back(c);
     cross.push_back({ 0, 0 });
+    g.push_back(b);
     cross.push_back({ 1, 0 });
+    g.push_back(b);
     cross.push_back({ -1, 0 });
+    g.push_back(b);
     cross.push_back({ 0, 1 });
+    g.push_back(b);
     cross.push_back({ 0, -1 });
     vector<pair<conditionchar, pair<int, int>>> isaircheck;
     isaircheck.push_back({ isair,{1,0} });
     funcarr<1> tempwrite;
     tempwrite.doupdatesg(cross);
-    tempwrite.addell(1, 0, {}, isaircheck, true, false);
+    tempwrite.updatesetgadd(g);
+    tempwrite.addell(1, 0, {}, {}, isaircheck, true, false);
     funcexunit<1> t;
     t.func = tempwrite;
     t.nuscords = { FALLING };
@@ -159,13 +169,13 @@ int main()
         
         //cout<<changeset.size();
         end = chrono::high_resolution_clock::now();;
-        //printboard(arr, COL, ROW);
+        printboard(arr, COL, ROW);
         //cout <<endl<< changeset.size()<<endl;
         before1 = chrono::high_resolution_clock::now();
         applychangeset(arr, COL, ROW, changeset);
         end = chrono::high_resolution_clock::now();
         updateset.refresh();
-        //cin >> gg;
+        cin >> gg;
         if (i == 32) {
             end = chrono::high_resolution_clock::now();
             cout << "time:" << chrono::duration_cast<chrono::microseconds>(end - before).count() << endl;
