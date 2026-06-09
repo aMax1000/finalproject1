@@ -12,7 +12,7 @@
 #include <thread>
 #include <cstdlib>
 #include "basicslib.h"
-#include "Header.h"
+#include "safepixel1,2.h"
 bool isair(Pixel* a, Pixel* b) {
     return (a)->getint(TYPEV) == VOIDM;
 }
