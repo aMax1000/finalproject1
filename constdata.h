@@ -4,7 +4,7 @@
 #include <iostream>
 
 using namespace std;
-typedef bitset<1> bool;
+typedef bool bit;
 enum matreals {
 	VOIDM,
 
