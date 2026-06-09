@@ -10,11 +10,11 @@ void dpr(T e, char t = ';') {
 template <typename T>
 void resize(T*& arr, int oldsize, int size) {
     T* arr3 = new T[size];
-    if(arr!=nullptr){
-    for (int i = 0; i < oldsize; i++) {
-        arr3[i] = arr[i];
-    }
-    delete[] arr;
+    if (arr != nullptr) {
+        for (int i = 0; i < oldsize; i++) {
+            arr3[i] = arr[i];
+        }
+        delete[] arr;
     }
     arr = arr3;
 
@@ -39,6 +39,10 @@ void print(vector<pair<T, T2>> a) {
     for (pair<T, T2> n : a) {
         cout << n.first << ';' << n.second << '\n';
     }
+}
+template <typename T, typename T2>
+void print(pair<T, T2> a) {
+        cout << a.first << ';' << a.second << '\n';
 }
 char extactchar(string a, int plase) {
     return a[plase];
