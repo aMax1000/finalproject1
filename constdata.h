@@ -1,5 +1,10 @@
 #pragma once
-typedef bitset<1> bit;
+#include <bit>
+#include <bitset>
+#include <iostream>
+
+using namespace std;
+typedef bitset<1> bool;
 enum matreals {
 	VOIDM,
 
@@ -30,7 +35,7 @@ enum matreals {
 	//BREAD_PLURONIUM,
 
 	////liqids
-	//WATER,
+	WATER,
 	//MOLTEN_STONE,
 	//MOLTEN_GLASS,
 	//MOLTEN_ORE,
@@ -80,12 +85,14 @@ enum variableb {
 	ELCOLDOWN,
 };
 enum variablei {
+	TYPEV,
 	//particle
 	COUNT,
 	DIRECTION,
 };
 enum variablef {
 	//bacis
+
 	TEMPRATURE,
 };
 
@@ -134,7 +141,7 @@ int consti(matreals type, paramiteri selector) {
 		switch (selector)
 		{
 		case TYPE:
-			return BASICMAT;
+			return COUNDUCTOR;
 			break;
 		case DENSITY:
 			return -10;
@@ -187,16 +194,40 @@ int consti(matreals type, paramiteri selector) {
 			break;
 		}
 		break;
+	case WATER:
+		switch (selector)
+		{
+		case TYPE:
+			return BASICMAT;
+			break;
+		case DENSITY:
+			return 5;
+			break;
+		case MELT_TYPE:
+			return -1;
+			break;
+		case SOLID_TYPE:
+			return -1;
+			break;
+		default:
+			break;
+		}
+		break;
 	default:
 		cout << "ERROR AT TYPE FINDER";
 		break;
 	}
 }
 
-float constf(matreals type, paramiterf selector) {
+//float constf(matreals type, paramiterf selector) {
+//
+//}
+//
+//bit constb(matreals type, paramiterb selector) {
+//
+//}
 
-}
-
-bit constb(matreals type, paramiterb selector) {
-
-}
+enum updatesets {
+	SANDFALL,
+	ELECTRISITY,
+};
