@@ -12,7 +12,7 @@
 #include <thread>
 #include <cstdlib>
 #include "basicslib.h"
-#include "safepixel1,2.h"
+#include "Header.h"
 bool isair(Pixel* a, Pixel* b) {
     return (a)->getint(TYPEV) == VOIDM;
 }
@@ -64,8 +64,8 @@ void pointsetBasicMat(Pixel*** arr, int COL, int ROW,int x,int y,vector<updatese
 
 int main()
 {
-    int COL = pow(2, 4);
-    int ROW = pow(2, 4);
+    int COL = pow(2, 10);
+    int ROW = pow(2, 10);
     constexpr auto FRAMERATE = 20;
 
     setmasks(COL, ROW);
@@ -78,32 +78,40 @@ int main()
             arr[i][j] = new Void;
         }
     }
-    for (int j = 1; j < 5; j++) {
-        arr[10][j] = new BasicMat;
-        arr[10][j]->type = BEDROCK;
-    }
-    for (int j = 10; j < 16; j++) {
-        arr[10][j] = new BasicMat;
-        arr[10][j]->type = BEDROCK;
-    }
-    for (int i = 0; i < COL; i++) {
-        arr[i][0] = new BasicMat;
-        arr[i][0]->type = BEDROCK;
-    }
-    for (int i = 0; i < COL; i++) {
-        arr[i][6] = new BasicMat;
-        arr[i][6]->type = BEDROCK;
-    }
-    for (int i = 0; i < COL; i++) {
-        arr[i][8] = new BasicMat;
-        arr[i][8]->type = BEDROCK;
-    }
-    for (int i = 0; i < COL; i++) {
-        arr[i][15] = new BasicMat;
-        arr[i][15]->type = BEDROCK;
+    for (int i = 0; i < COL; i += 2) {
+        for (int j = 0; j < ROW; j++) {
+            arr[i][j] = new BasicMat;
+            arr[i][j]->type = SAND;
+        }
     }
 
+    //for (int j = 1; j < 5; j++) {
+    //    arr[10][j] = new BasicMat;
+    //    arr[10][j]->type = BEDROCK;
+    //}
+    //for (int j = 10; j < 16; j++) {
+    //    arr[10][j] = new BasicMat;
+    //    arr[10][j]->type = BEDROCK;
+    //}
+    //for (int i = 0; i < COL; i++) {
+    //    arr[i][0] = new BasicMat;
+    //    arr[i][0]->type = BEDROCK;
+    //}
+    //for (int i = 0; i < COL; i++) {
+    //    arr[i][6] = new BasicMat;
+    //    arr[i][6]->type = BEDROCK;
+    //}
+    //for (int i = 0; i < COL; i++) {
+    //    arr[i][8] = new BasicMat;
+    //    arr[i][8]->type = BEDROCK;
+    //}
+    //for (int i = 0; i < COL; i++) {
+    //    arr[i][15] = new BasicMat;
+    //    arr[i][15]->type = BEDROCK;
+    //}
+
     //update templates
+    toupdate updat;
     vector<pair<int, int>> cross;
     cross.push_back({ 0, 0 });
     cross.push_back({ 1, 0 });
@@ -112,23 +120,30 @@ int main()
     cross.push_back({ 0, -1 });
 
     //functions
-    funcexunit<3,1> sandfall;
-    sandfall.func.addell(1, 0, {}, {{isair,{1,0}}}, true, false);
-    sandfall.func.addell(1, 1, { {1,1} }, { {isair,{1,1}} }, true, false);
-    sandfall.func.addell(1, -1, { {1,-1} }, { {isair,{1,-1}} }, true, false);
-    sandfall.func.doupdatesg(cross);
-    sandfall.nuscords = { SANDFALL };
-    sandfall.cond1 = issand1;
+    funcexunit<3, 1> sandfall;
 
-    funcexunit<5, 1> waterfall;
-    waterfall.func.addell(1, 0, {}, { {isair,{1,0}} }, true, false);
-    waterfall.func.addell(1, 1, { {1,1} }, { {isair,{1,1}} }, true, false);
-    waterfall.func.addell(1, -1, { {1,-1} }, { {isair,{1,-1}} }, true, false);
-    waterfall.func.addell(0, 1, {}, { {isair,{0,1}},{iswater,{1,1}} }, true, false);
-    waterfall.func.addell(0, -1, {}, { {isair,{0,-1}},{iswater,{1,-1}} }, true, false);
-    waterfall.func.doupdatesg(cross);
-    waterfall.nuscords = { SANDFALL };
-    waterfall.cond1 = iswater1;
+    updat.push_back(SANDFALL, cross);
+    sandfall.func.doupdatesg(updat);
+    updat.clear();
+
+    sandfall.func.addell({ 1, 0 }, {}, { {isair,{1,0}} }, true);
+
+    sandfall.func.addell({ 1, 1 }, { {SANDFALL, { {1,1} }} }, { {isair,{1,1}} }, true);
+
+    sandfall.func.addell({ 1, -1 } , { {SANDFALL, { {1,1} } } } , { {isair,{1,-1}} }, true);
+
+    sandfall.cond1 = issand1;
+    sandfall.whatupdetesetuse = { SANDFALL };
+
+    //funcexunit<5, 1> waterfall;
+    //waterfall.func.addell({1, 0}, {}, { {isair,{1,0}} }, true);
+    //waterfall.func.addell({ 1, 1 }, { {1,1} }, { {isair,{1,1}} }, true);
+    //waterfall.func.addell({ 1, -1 }, { {1,-1} }, { {isair,{1,-1}} }, true);
+    //waterfall.func.addell({ 0, 1 }, {}, { {isair,{0,1}},{iswater,{1,0}} }, true);
+    //waterfall.func.addell({ 0, -1 }, {}, { {isair,{0,-1}},{iswater,{1,0}} }, true);
+    //waterfall.func.doupdatesg(cross);
+    //waterfall.nuscords = { SANDFALL };
+    //waterfall.cond1 = iswater1;
 
 
     int gg = 0;
@@ -145,34 +160,27 @@ int main()
         updateset.os.push_back({});
     }
 
-    vector<updatesets> updatesets;
-    updatesets.push_back(SANDFALL);
     vector<updatee> changeset;
 
-
+    auto before = chrono::high_resolution_clock::now();
     while (!gg) {
-
-
-        printboard(arr, COL, ROW);
+        //printboard(arr, COL, ROW);
         frame = chrono::high_resolution_clock::now();
-        //delete arr[0][5];
-        //arr[0][5] = new BasicMat;
-        //arr[0][5]->type = WATER;
-        update(arr, COL, ROW, updateset, updatesets, sandfall, changeset);
-        update(arr, COL, ROW, updateset, updatesets, waterfall, changeset);
+        update(arr, COL, ROW, updateset, sandfall, changeset);
+        //update(arr, COL, ROW, updateset, waterfall, changeset);
         applychangeset(arr, COL, ROW, changeset);
-        pointsetBasicMat(arr, COL, ROW, 3, 3, { SANDFALL }, updateset, Examplesand);
-        pointsetBasicMat(arr, COL, ROW, 3, 13, { SANDFALL }, updateset, Examplewater);
+        //pointsetBasicMat(arr, COL, ROW, 3, 3, { SANDFALL }, updateset, Examplesand);
+        //pointsetBasicMat(arr, COL, ROW, 3, 13, { SANDFALL }, updateset, Examplewater);
         updateset.refresh();
 
         endframe = chrono::high_resolution_clock::now();
         std::this_thread::sleep_for(std::chrono::microseconds(1000000/FRAMERATE-(chrono::duration_cast<chrono::microseconds>(endframe - frame).count())));
 
-        //if (i == 32) {
-        //    end = chrono::high_resolution_clock::now();
-        //    cout << "time:" << chrono::duration_cast<chrono::microseconds>(end - before).count() << endl;
-        //}
-        //i++;
+        if (i == 32) {
+            auto end = chrono::high_resolution_clock::now();
+            cout << "time:" << chrono::duration_cast<chrono::microseconds>(end - before).count() << endl;
+        }
+        i++;
     }
 }
 
