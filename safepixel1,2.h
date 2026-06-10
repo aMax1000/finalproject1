@@ -237,26 +237,42 @@ union U {
     ptoff f;
 };
 
+struct toupdate {
+    vector<updatesets> updatesetsss;
+    vector<vector<pair<int, int>>> toupdates;
+    void create(vector<pair<updatesets,vector<pair<int, int>>>> a) {
+        for (pair<updatesets, vector<pair<int, int>>> n : a) {
+            updatesetsss.push_back(n.first);
+            toupdates.push_back(n.second);
+        }
+    }
+    void push_back(updatesets updatesetsss1, vector<pair<int, int>> toupdates1) {
+        updatesetsss.push_back(updatesetsss1);
+        toupdates.push_back(toupdates1);
+    }
+    void clear(){
+        updatesetsss.clear();
+        toupdates.clear();
+    }
+};
+
 //settings of functions
 template <int Funcsize>
 struct func2d {
     vector<pair<conditionchar, pair<int, int>>> condition;
-    vector<pair<int, int>> toupdates;
-    int x;
-    int y;
+    toupdate toupdates;
     bool breakontrue;
-    bool instantapply;
-    array<pair<U, unsigned char>,Funcsize> func;
+    array<pair<pair<int,int>,pair<U, unsigned char>>, Funcsize> func;
 };
 
 //object to run array of functions with settings
 
 
-template <int Size,int Funcsize>
+template <int Size, int Funcsize>
 class funcarr {
 private:
     array<func2d<Funcsize>, Size> settingarr;
-    vector<pair<int, int>> toupdatesg;
+    toupdate toupdatesg;
 public:
 
     int size1 = 0;
@@ -270,34 +286,30 @@ public:
     //        delete[] settingarr;
     //    }
     //}
-    void doupdatesg(vector<pair<int, int>>& a) {
+    void doupdatesg(toupdate& a) {
         toupdatesg = a;
     }
-    void addell(array<pair<U, unsigned char>,Funcsize> func, int x, int y, vector<pair<int, int>> toupdates,
-        vector<pair<conditionchar, pair<int, int>>> condition, bool breakontrue1, bool instantapply1) {
+    void addell(array<pair<pair<int, int>, pair<U, unsigned char>>, Funcsize> func, int x, int y, 
+        vector<pair<updatesets, vector<pair<int, int>>>> toupdates1,
+        vector<pair<conditionchar, pair<int, int>>> condition, bool breakontrue1) {
         func2d a;
         a.condition = condition;
-        a.toupdates = toupdates;
-        a.x = x;
-        a.y = y;
+        a.toupdates.create(toupdates1);
         a.breakontrue = breakontrue1;
-        a.instantapply = instantapply1;
         a.func = func;
         settingarr.at(size1) = a;
         size1++;
     }
-    void addell(int x, int y, vector<pair<int, int>> toupdates,
-        vector<pair<conditionchar, pair<int, int>>> condition, bool breakontrue1, bool instantapply1) {
+    void addell(pair<int,int> cords, vector<pair<updatesets, vector<pair<int, int>>>> toupdates1,
+        vector<pair<conditionchar, pair<int, int>>> condition, bool breakontrue1) {
         func2d<1> a;
         a.condition = condition;
-        a.toupdates = toupdates;
-        a.x = x;
-        a.y = y;
+        a.toupdates.create(toupdates1);
         a.breakontrue = breakontrue1;
-        a.instantapply = instantapply1;
-        pair<U, unsigned char> h;
-        h.second = 3;
-        a.func[0]=(h);
+        pair < pair<int, int>, pair<U, unsigned char>> h;
+        h.first = cords;
+        h.second.second = 3;
+        a.func[0] = h;
 
         settingarr.at(size1) = a;
         size1++;
@@ -315,26 +327,7 @@ public:
         }
 
     };
-    int x(int i) {
-        if (i < size1) {
-            //cout << "n " << settingarr[i].x << endl;
-            return (settingarr.at(i).x);
-
-        }
-        else {
-            cout << "ERROR OUT OF INDEX X\n";
-        }
-
-    };
-    int y(int i) {
-        if (i < size1) {
-            return (settingarr.at(i).y);
-        }
-        else {
-            cout << "ERROR OUT OF INDEX Y\n";
-        }
-    };
-    array<pair<U, unsigned char>,Funcsize> funb(int i) {
+    array<pair<pair<int, int>, pair<U, unsigned char>>, Funcsize> funb(int i) {
         if (i < size1) {
             return settingarr[i].func;
         }
@@ -350,7 +343,7 @@ public:
             cout << "ERROR OUT OF INDEX COND";
         }
     };
-    vector<pair<int, int>>& doupdate(int i) {
+    toupdate& doupdate(int i) {
         if (i < size1) {
             return (settingarr[i].toupdates);
         }
@@ -382,7 +375,7 @@ public:
             cout << "ERROR OUT OF INDEX instantapply";
         }
     }
-    vector<pair<int, int>>& doupdateg() {
+    toupdate& doupdateg() {
         return (toupdatesg);
     };
 };
@@ -448,8 +441,14 @@ struct pairset {
     pairset(int len, int col, int row) {
         for (int i = 0; i < len; i++) {
             newupdatesett* aboba = new newupdatesett{ col,row };
+            os.push_back({});
             ns.push_back(*aboba);
+            for (int k = 0; k < col; k++) {
+                for (int j = 0; j < row; j++) {
+                    os[i].push_back({k,j});
 
+                }
+            }
         }
     }
     void refresh() {
@@ -494,41 +493,40 @@ void applychange(Pixel***& arr, int col, int row, updatee& a) {
 }
 
 //running array of functions
-template <int Size,int Funcsize>
-void saferunup(Pixel*** arr, int col, int row, int x, int y, funcarr<Size,Funcsize>& a,
-    vector<newupdatesett>& newupdateset, vector<updatesets>& whatupdatestoadd, vector<updatee>& changeset) {
-    clock_t before2 = clock();
+template <int Size, int Funcsize>
+void saferunup(Pixel*** arr, int col, int row, int x, int y, funcarr<Size, Funcsize>& a,
+    vector<newupdatesett>& newupdateset, vector<updatee>& changeset) {
     updatee upd = {};
     int d = a.size();
-    for (pair<int, int> k : a.doupdateg()) {
-        //cout << ' ' << k.first <<' '<< k.second;
-        for (updatesets j : whatupdatestoadd) {
-            //cout << "index: " << j;
+    int i2 = 0;
+    for (updatesets j : a.doupdateg().updatesetsss) {
+        for (pair<int, int> k : a.doupdateg().toupdates[i2++]) {
             newupdateset[j].push_back({ (x + k.first) & maskx ,(y + k.second) & masky });
-            //cout << "C1";
         }
+        i2++;
     }
     Pixel* initialpixel = getvalue(arr, x, y);
     for (int i = 0; d > i; i++) {
         //cout << "a";
-        upd.x = (x + a.x(i)) & maskx;
-        upd.y = (y + a.y(i)) & masky;
+
         if (runcondarr(a.cond(i), arr, col, row, x, y)) {
             //cout << "g3";
-            for(pair<U,unsigned char> k:a.funb(i)){
-                switch (k.second)
+            for (pair<pair<int,int>,pair<U, unsigned char>> k : a.funb(i)) {
+                upd.x = (x + k.first.first) & maskx;
+                upd.y = (y + k.first.second) & masky;
+                switch (k.second.second)
                 {
                 case(0):
                     //b.a = new ;
-                    upd.data.b = (k.first.b)(arr[upd.x][upd.y], initialpixel);
+                    upd.data.b = (k.second.first.b)(arr[upd.x][upd.y], initialpixel);
                     upd.typeoffunc = 0;
                     break;
                 case(1):
-                    upd.data.i = (k.first.i)(arr[upd.x][upd.y], initialpixel);
+                    upd.data.i = (k.second.first.i)(arr[upd.x][upd.y], initialpixel);
                     upd.typeoffunc = 1;
                     break;
                 case(2):
-                   upd.data.f = (k.first.f)(arr[upd.x][upd.y], initialpixel);
+                    upd.data.f = (k.second.first.f)(arr[upd.x][upd.y], initialpixel);
                     upd.typeoffunc = 2;
                     break;
                 case(3):
@@ -540,24 +538,19 @@ void saferunup(Pixel*** arr, int col, int row, int x, int y, funcarr<Size,Funcsi
                     cout << "ERROR AT NAME OF FUCNTION";
                     break;
                 }
+                changeset.push_back(upd);
             }
-            for (pair<int, int> k : a.doupdate(i)) {
-                //cout << ' ' << k.first <<' '<< k.second;
-                for (updatesets j : whatupdatestoadd) {
-                    //cout << "index: " << j;
-                    newupdateset[j].push_back({ (upd.x + k.first) & maskx ,(upd.y + k.second) & masky });
-                    //cout << "C1";
+            i2 = 0;
+            for (updatesets j : a.doupdate(i).updatesetsss) {
+                for (pair<int, int> k : a.doupdate(i).toupdates[i2++]) {
+                    newupdateset[j].push_back({ (x + k.first) & maskx ,(y + k.second) & masky });
                 }
+                i2++;
             }
             //cout << "g5";
             //cout << "a: " << static_cast<int>(in.path)<<endl;
             //cout << "a2: " << static_cast<int>((*(Changei*)b.a).path)<<endl;
-            if (a.instantapply(i)) {
-                applychange(arr, col, row, upd);
-            }
-            else {
-                changeset.push_back(upd);
-            }
+
             if (a.breakontrue(i)) return;
             //cout << "a3: " << static_cast<int>((changeset[0].data.i).path) << endl;
             /*cout << "a22: " << static_cast<int>((*(Changei*)b.a).path) << endl;*/
@@ -571,7 +564,7 @@ void saferunup(Pixel*** arr, int col, int row, int x, int y, funcarr<Size,Funcsi
 //function with condition to trigger it 
 template <int Size, int Funcsize>
 struct funcexunit {
-    vector<updatesets> nuscords;
+    vector<updatesets> whatupdetesetuse;
     funcarr<Size, Funcsize> func;
     conditionchar1 cond1;
 };
@@ -591,7 +584,7 @@ void applychangeset(Pixel*** arr, int col, int row, vector<updatee>& changeset) 
 }
 
 //checking all of board for condition
-template <int Size,int Funcsize>
+template <int Size, int Funcsize>
 void checkfor(Pixel*** arr, int col, int row, vector<newupdatesett>& newupdateset,
     funcexunit<Size, Funcsize>& funcs, vector<updatee>& changeset) {
     auto before1 = chrono::high_resolution_clock::now();;
@@ -616,15 +609,15 @@ void checkfor(Pixel*** arr, int col, int row, vector<newupdatesett>& newupdatese
     return;
 }
 
-//checking only old updatesets for condition
-template <int Size,int Funcsize>
+//checking only updatesets for condition
+template <int Size, int Funcsize>
 void update(Pixel*** arr, int col, int row,
-    pairset& pairupdateset, vector<updatesets>& whatupdetesetuse,
+    pairset& pairupdateset,
     funcexunit<Size, Funcsize>& funcs, vector<updatee>& changeset) {
-    for (updatesets i : whatupdetesetuse)
+    for (updatesets i : funcs.whatupdetesetuse)
         for (pair<int, int> n : pairupdateset.os[i]) {
             if (funcs.cond1(arr[n.first][n.second])) {
-                saferunup(arr, col, row, n.first, n.second, funcs.func, (pairupdateset.ns), funcs.nuscords, changeset);
+                saferunup(arr, col, row, n.first, n.second, funcs.func, (pairupdateset.ns), changeset);
             }
         }
     return;
