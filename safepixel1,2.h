@@ -269,12 +269,9 @@ struct func2d {
 
 
 template <int Size, int Funcsize>
-class funcarr {
-private:
+struct funcarr {
     array<func2d<Funcsize>, Size> settingarr;
     toupdate toupdatesg;
-public:
-
     int size1 = 0;
     //ДЕКОНСТРУКТОР РАБОТАЕТ 2 РАЗА ЕСЛИ ОБЬЕКТ В ВЕКТОРЕ
     //~funcarr() {
@@ -286,8 +283,10 @@ public:
     //        delete[] settingarr;
     //    }
     //}
-    void doupdatesg(toupdate& a) {
-        toupdatesg = a;
+    void doupdatesg(vector<pair<updatesets, vector<pair<int, int>>>> a) {
+        for (pair<updatesets, vector<pair<int, int>>> n : a) {
+            toupdatesg.push_back(n.first, n.second);
+        }
     }
     void addell(array<pair<pair<int, int>, pair<U, unsigned char>>, Funcsize> func, int x, int y, 
         vector<pair<updatesets, vector<pair<int, int>>>> toupdates1,
@@ -500,8 +499,9 @@ void saferunup(Pixel*** arr, int col, int row, int x, int y, funcarr<Size, Funcs
     int d = a.size();
     int i2 = 0;
     for (updatesets j : a.doupdateg().updatesetsss) {
-        for (pair<int, int> k : a.doupdateg().toupdates[i2++]) {
+        for (pair<int, int> k : a.doupdateg().toupdates[i2]) {
             newupdateset[j].push_back({ (x + k.first) & maskx ,(y + k.second) & masky });
+            //print(k);
         }
         i2++;
     }
@@ -511,7 +511,7 @@ void saferunup(Pixel*** arr, int col, int row, int x, int y, funcarr<Size, Funcs
 
         if (runcondarr(a.cond(i), arr, col, row, x, y)) {
             //cout << "g3";
-            for (pair<pair<int,int>,pair<U, unsigned char>> k : a.funb(i)) {
+            for (const pair<pair<int,int>,pair<U, unsigned char>>& k : a.funb(i)) {
                 upd.x = (x + k.first.first) & maskx;
                 upd.y = (y + k.first.second) & masky;
                 switch (k.second.second)
@@ -542,7 +542,7 @@ void saferunup(Pixel*** arr, int col, int row, int x, int y, funcarr<Size, Funcs
             }
             i2 = 0;
             for (updatesets j : a.doupdate(i).updatesetsss) {
-                for (pair<int, int> k : a.doupdate(i).toupdates[i2++]) {
+                for (pair<int, int> k : a.doupdate(i).toupdates[i2]) {
                     newupdateset[j].push_back({ (x + k.first) & maskx ,(y + k.second) & masky });
                 }
                 i2++;
@@ -614,7 +614,7 @@ template <int Size, int Funcsize>
 void update(Pixel*** arr, int col, int row,
     pairset& pairupdateset,
     funcexunit<Size, Funcsize>& funcs, vector<updatee>& changeset) {
-    for (updatesets i : funcs.whatupdetesetuse)
+    for (updatesets& i : funcs.whatupdetesetuse)
         for (pair<int, int> n : pairupdateset.os[i]) {
             if (funcs.cond1(arr[n.first][n.second])) {
                 saferunup(arr, col, row, n.first, n.second, funcs.func, (pairupdateset.ns), changeset);
