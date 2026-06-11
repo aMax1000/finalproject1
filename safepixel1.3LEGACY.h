@@ -240,9 +240,8 @@ template <size_t Sizeupdatesets, size_t Sizemaxupdates>
 struct toupdate {
     int couter = 0;
     array<size_t, Sizeupdatesets> updatescount{};
-
     array<updatesets, Sizeupdatesets> updatesetsss{};
-    array<array<pair<int, int>, Sizemaxupdates>, Sizeupdatesets> toupdates{};
+    array<array<pair<int8_t, int8_t>, Sizemaxupdates>, Sizeupdatesets> toupdates{};
     void create(vector<pair<updatesets, vector<pair<int, int>>>> a) {
         for (pair<updatesets, vector<pair<int, int>>> n : a) {
             if (couter == Sizemaxupdates) cout << "OUT OF RANGE Sizeupdatesets";
