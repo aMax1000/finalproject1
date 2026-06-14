@@ -1,801 +1,528 @@
-#pragma once
-#include <vector>
+// sandfall.cpp : This file contains the 'main' function. Program execution begins and ends there.
 #include <iostream>
 #include <utility>
+#include <vector>
 #include <Windows.h>
 #include <bit>
 #include <bitset>
 #include <typeinfo>
-#include <any>
 #include <chrono>
-#include <set>
 #include <array>
+#include <stack>
+#include <thread>
+#include <cstdlib>
 #include "basicslib.h"
+#include "safepixel1,2,5.h"
 #include "constdata.h"
-using namespace std;
 
-unsigned short maskx;
-unsigned short masky;
-
-void setmasks(int x, int y) {
-    maskx = x - 1;
-    masky = y - 1;
-    //cout << std::bitset<8>(maskx);
+static bool isair(Pixel* a, Pixel* b) {
+    return (a)->getint(TYPEV) == VOIDM;
 }
-
-
-//Can disable error messages for some types of "CANNONT FIND ELEMENT" 
-void errp(char type, char path) {
-    //switch (type)
-    //{
-    //default:
-    //    cout << "CANNONT FIND ELEMENT: " << path << " AT TYPE " << type << endl;
-    //    break;
-    //}
+static bool issimplefallable(Pixel* a) {
+    return constb(a->type,IS_SIMPLEFALLABLE);
 }
-
-
-//General Pixel class with dummy fucntions
-class Pixel {
-protected:
-
-public:
-
-    matreals type;
-
-    virtual bool getbit(variableb a) {
-        switch (a)
-        {
-        default:
-            errp(type, a);
-            return 0;
-            break;
-        }
-    }
-    virtual void writebit(variableb a, bool b) {
-        switch (a)
-        {
-        default:
-            errp(type, a);
-            return;
-            break;
-        }
-    }
-    virtual int getint(variablei a) {
-        switch (a)
-        {
-        case TYPEV:
-            return type;
-            break;
-        default:
-            errp(type, a);
-            return 0;
-            break;
-        }
-    }
-    virtual void writeint(variablei a, int b);
-    virtual void writedint(variablei a, int b) {
-        switch (a)
-        {
-        default:
-            errp(type, a);
-            break;
-        }
-    };
-    virtual float getfloat(variablef a) {
-        switch (a)
-        {
-        case TEMPRATURE:
-            return 0;
-            break;
-        default:
-            errp(type, a);
-            return 0;
-            break;
-        }
-    }
-    virtual void writefloat(variablef a, float b) {
-        switch (a)
-        {
-        case TEMPRATURE:
-            break;
-        default:
-            errp(type, a);
-            return;
-            break;
-        }
-    }
-    virtual void writedfloat(variablef a, float b) {
-        switch (a)
-        {
-        case TEMPRATURE:
-            break;
-        default:
-            errp(type, a);
-            break;
-        }
-    };
-    //Pixel getPixel(char a);
-    //void writePixel(char a, Pixel b);
-
-};
-//Pixel NULLPIXEL;
-//Pixel Pixel::getPixel(char a) {
-//    switch (a)
-//    {
-//    default:
-//        errp(type, a);;
-//        return NULLPIXEL;
-//        break;
-//    }
-//}
-//void Pixel::writePixel(char a, Pixel b) {
-//    switch (a)
-//    {
-//    default:
-//        errp(type, a);;
-//
-//        break;
-//    }
-//    return;
-//}
-
-// Derived classes-materials
-
-class Void : public Pixel {
-public:
-    Void() {
-        type = VOIDM;
-    }
-};
-
-class BasicMat : public Void {
-public:
-    float t = 3.0;
-    BasicMat() {
-        t = 2.0;
-    }
-    virtual float getfloat(variablef a) {
-        switch (a)
-        {
-        case(TEMPRATURE):
-            return t;
-            break;
-        default:
-            errp(type, a);
-            break;
-        }
-        return 0;
-    }
-    virtual void writefloat(variablef a, float b) {
-        switch (a)
-        {
-        case(TEMPRATURE):
-            //cout << "temp before"<<t << endl;
-            t = b;
-            //cout << "temp after" << t << endl;
-            break;
-        default:
-            errp(type, a);
-
-            break;
-        }
-        return;
-    }
-    virtual void writedfloat(variablef a, float b) {
-        switch (a)
-        {
-        case(TEMPRATURE):
-            //cout << "temp before"<<t << endl;
-            t += b;
-            //cout << "temp after" << t << endl;
-            break;
-        default:
-            errp(type, a);
-
-            break;
-        }
-        return;
-    };
-};
-class Counuctor : public BasicMat {
-public:
-    bool charge=0;
-    bool cooldown=0;
-    virtual bool getbit(variableb a) {
-        switch (a)
-        {
-        case POWER:
-            return charge;
-            break;
-        case ELCOLDOWN:
-            return cooldown;
-            break;
-        default:
-            errp(type, a);
-            return 0;
-            break;
-        }
-    }
-    virtual void writebit(variableb a, bool b) {
-        switch (a)
-        {
-        case POWER:
-            charge=b;
-            break;
-        case ELCOLDOWN:
-            cooldown=b;
-            break;
-        default:
-            errp(type, a);
-            return;
-            break;
-        }
-    }
-};
-
-void rewrite_type(Pixel* a, classes type) {
-    Pixel* b;
-    switch (type)
-    {
-    case VOIDC:
-        b = new Void;
-        return;
-    case BASICMAT:
-        b = new BasicMat;
-        return;
-    case COUNDUCTOR:
-        b = new Counuctor;
-        return;
-    case PARTICLE:
-        return;
-    default:
-        cout << "ERROR AT REWRITING CLASS";
-        return;
-    }
-    for (auto d:paramiterclasses(static_cast<classes>(consti(a->type, TYPE)))) {
-        switch (d.second)
-        {
-        case 0:
-            b->writebit(d.first.bv, a->getbit(d.first.bv));
-            break;
-        case 1:
-            b->writeint(d.first.iv, a->getint(d.first.iv));
-            break;
-        case 2:
-            b->writefloat(d.first.fv, a->getfloat(d.first.fv));
-            break;
-        default:
-            cout << "ERROR AT REWRITING CLASS 2";
-            break;
-        }
-    }
-
-    delete a;
-    a = b;
+static bool issimplefloatable1(Pixel* a) {
+    return constb(a->type, IS_SIMPLEFLOATABLE);
+}
+static bool issimplefloatable(Pixel* a, Pixel* b) {
+    return constb(a->type, IS_SIMPLEFLOATABLE);
+}
+static Changefd termalexcange(Pixel* a, Pixel* b) {
+    float ret = (a->getfloat(TEMPRATURE)-b->getfloat(TEMPRATURE))
+        *constf((a->type), THERMAL_CONDUCIVITY) * constf((b->type), THERMAL_CONDUCIVITY);
+    //cout << "datepre: " << ret << endl;
+    return { TEMPRATURE,ret};
+}
+static Changei melt(Pixel* a, Pixel* b) {
+    //cout << "melt_type: " << consti(a->type, MELT_TYPE) << endl;
+    return { TYPEV,consti(a->type,MELT_TYPE)};
+}
+static Changei solidify(Pixel* a, Pixel* b) {
+    return { TYPEV,consti(a->type,SOLID_TYPE)};
+}
+static bool canmelt(Pixel* a, Pixel* b) {
+    //cout << "melt_type: " << consti(a->type, MELT_TYPE) << endl;
+    return ((consti(a->type, MELT_TYPE) != -1) and (a->getfloat(TEMPRATURE) >= constf(a->type, MELT_TEMPRATURE)));
+}
+static bool cansolidify(Pixel* a, Pixel* b) {
+    return consti(a->type, SOLID_TYPE) != -1 and a->getfloat(TEMPRATURE) <= constf(a->type, SOLID_TEMPRATURE);
+}
+static bool instvoid1(Pixel* a) {
+    return (consti(a->type, TYPE) != VOIDC);
+}
+static bool inconductor1(Pixel* a) {
+    //cout << (consti(a->type, TYPE) == COUNDUCTOR and !a->getbit(ELCOLDOWN));
+    return (consti(a->type, TYPE) == COUNDUCTOR and !(a->getbit(ELCOLDOWN)));
     
 }
-
-void Pixel::writeint(variablei a, int b) {
-    switch (a)
-    {
-    case TYPEV:
-        if (consti(type, TYPE) != consti(static_cast<matreals>(b), TYPE)) {
-            rewrite_type(this, static_cast<classes>(consti(static_cast<matreals>(b), TYPE)));
-        }
-        type = static_cast<matreals>(b);
+static bool inconductor(Pixel* a, Pixel* b) {
+    return (consti(a->type, TYPE) == COUNDUCTOR and !(a->getbit(ELCOLDOWN)));
+}
+static Changeb charging(Pixel* a, Pixel* b) {
+    return { POWER,true };
+}
+static Changeb discharging(Pixel* a, Pixel* b) {
+    return { POWER,false };
+}
+static Changeb coolcharging(Pixel* a, Pixel* b) {
+    return { ELCOLDOWN,true };
+}
+static Changeb discoolcharging(Pixel* a, Pixel* b) {
+    return { ELCOLDOWN,false };
+}
+//static bool ischarge(Pixel* a, Pixel* b) {
+//    return a->getbit(POWER) and !a->getbit(ELCOLDOWN);
+//}
+static bool ischarge1(Pixel* a) {
+    return ((a->getbit(POWER)) and !(a->getbit(ELCOLDOWN)));
+}
+static bool iscoolcharge1(Pixel* a) {
+    return ((a->getbit(ELCOLDOWN)));
+}
+char pixelchar(int type) {
+    switch (type) {
+    case VOIDM:
+        return ' ';
+        break;
+    case BEDROCK:
+        return 'B';
+        break;
+    case IRON:
+        return 'I';
+        break;
+    case COPPER:
+        return 'C';
+        break;
+    case MOLTEN_COPPER:
+        return 'L';
+        break;
+    case MOLTEN_IRON:
+        return 'L';
+        break;
+    case SAND:
+        return 'S';
+        break;
+    case WATER:
+        return 'W';
         break;
     default:
-        errp(type, a);
-        return;
-        break;
+        std::cout << "UNDISPLAYABLE PIXEL";
+        return ' ';
     }
 }
-
-
-//getting element ta coords of board with transition 
-Pixel* getvalue(Pixel*** arr, int x, int y) {
-    return arr[x & maskx][y & masky];
+char pixelcolors(int type) {
+    switch (type) {
+    case VOIDM:
+        return 0;
+        break;
+    case BEDROCK:
+        return 8;
+        break;
+    case IRON:
+        return 7;
+        break;
+    case COPPER:
+        return 6;
+        break;
+    case MOLTEN_COPPER:
+        return 14;
+        break;
+    case MOLTEN_IRON:
+        return 6;
+        break;
+    case SAND:
+        return 14;
+        break;
+    case WATER:
+        return 9;
+        break;
+    default:
+        std::cout << "UNDISPLAYABLE PIXEL";
+        return ' ';
+    }
 }
-
-
-bool truec(Pixel* a, Pixel* b) {
-    return true;
+int termalcolors(float tempr) {
+    if (tempr < 200) {
+        return 0;
+    }
+    else if (tempr < 400) {
+        return 4;
+    }
+    else if (tempr < 600) {
+        return 12;
+    }
+    else if(tempr < 800){
+        return 6;
+    }
+    else if (tempr < 1000) {
+        return 14;
+    }
+    else {
+        return 15;
+    }
 }
-bool truec1(Pixel* a) {
-    return true;
-}
-//path and value to change on Pixel
-struct Changeb {
-    variableb path;
-    bool value;
-};
-struct Changei {
-    variablei path;
-    int value;
-};
-struct Changef {
-    variablef path;
-    float value;
-};
-struct Changes {
-    int x;
-    int y;
-};
-struct Changeid {
-    variablei path;
-    int value;
-};
-struct Changefd {
-    variablef path;
-    float value;
-};
-
-//functions to change individual pixels
-typedef Changeb(*ptobf)(Pixel*, Pixel*);
-typedef Changei(*ptoif)(Pixel*, Pixel*);
-typedef Changef(*ptoff)(Pixel*, Pixel*);
-typedef Changeid(*ptoidf)(Pixel*, Pixel*);
-typedef Changefd(*ptofdf)(Pixel*, Pixel*);
-typedef bool (*conditionchar)(Pixel*, Pixel*);
-typedef bool (*conditionchar1)(Pixel*);
-
-union U {
-    ptobf b;
-    ptoif i;
-    ptoff f;
-    ptoidf id;
-    ptofdf fd;
-};
-
-struct toupdate {
-    vector<updatesets> updatesetsss;
-    vector<vector<pair<int, int>>> toupdates;
-    void create(vector<pair<updatesets, vector<pair<int, int>>>> a) {
-        for (pair<updatesets, vector<pair<int, int>>> n : a) {
-            updatesetsss.push_back(n.first);
-            toupdates.push_back(n.second);
+void displaypixel(Pixel* a) {
+    //cout << a->getbit(POWER);
+    if (a->getbit(POWER)) {
+        SetColor(pixelcolors(a->type), 14);
+    }
+    else if (a->getbit(ELCOLDOWN)) {
+        SetColor(pixelcolors(a->type), 6);
+    }
+    else {
+        int t = termalcolors(a->getfloat(TEMPRATURE));
+        if (t == 0) {
+            SetColor(0, pixelcolors(a->type));
+        }
+        else {
+            SetColor(pixelcolors(a->type), t);
         }
     }
-    void push_back(updatesets updatesetsss1, vector<pair<int, int>> toupdates1) {
-        updatesetsss.push_back(updatesetsss1);
-        toupdates.push_back(toupdates1);
-    }
-    void clear() {
-        updatesetsss.clear();
-        toupdates.clear();
-    }
+    
+    cout << pixelchar(a->type);
+    SetColor(7, 0);
 };
 
-//settings of functions
-template <int Funcsize>
-struct func2d {
-    vector<pair<conditionchar, pair<int, int>>> condition;
-    toupdate toupdates;
-    bool breakontrue;
-    bool reverceapply=false;
-    int size=1;
-    array<pair<pair<int, int>, pair<U, unsigned char>>, Funcsize> func;
-};
+static void printboard(Pixel*** arr, int COL, int ROW) {
+    std::system("cls");
+    for (int i = 0; COL > i; i++) {
+        for (int j = 0; ROW > j; j++) {
+            displaypixel(arr[i][j]);
+            cout<< ' ';
+        }
+        cout << "| \n";
+    }
+    for (int j = 0; ROW > j; j++) {
+        cout << "--";
+    }
+    cout << '\n';
+    SetColor(7, 0);
+}
+static void printboardtemprature(Pixel*** arr, int COL, int ROW) {
+    for (int i = 0; COL > i; i++) {
+        for (int j = 0; ROW > j; j++) {
+            cout<< ((arr[i][j]->getfloat(TEMPRATURE)));
+            cout << ' ';
+        }
+        cout << "| \n";
+    }
+    for (int j = 0; ROW > j; j++) {
+        cout << "--";
+    }
+    cout << '\n';
+}
 
-//object to run array of functions with settings
+
+static void pointsetBasicMat(Pixel*** arr, int COL, int ROW, int x, int y, vector<updatesets> a, pairset& updateset, BasicMat b) {
+    delete arr[x & maskx][y & masky];
+    arr[x & maskx][y & masky] = new BasicMat{ b };
+    for (updatesets k : a) {
+        updateset.ns[k].push_back({ x & maskx,y & masky });
+    }
+}
+static void pointsetBasicMat(Pixel*** arr, int COL, int ROW, int x, int y, vector<updatesets> a, pairset& updateset, Counuctor b) {
+    delete arr[x & maskx][y & masky];
+    arr[x & maskx][y & masky] = new Counuctor{ b };
+    for (updatesets k : a) {
+        updateset.ns[k].push_back({ x & maskx,y & masky });
+    }
+}
 
 
-template <int Size, int Funcsize>
-struct funcarr {
-    array<func2d<Funcsize>, Size> settingarr;
-    toupdate toupdatesg;
-    int size1 = 0;
-    //ДЕКОНСТРУКТОР РАБОТАЕТ 2 РАЗА ЕСЛИ ОБЬЕКТ В ВЕКТОРЕ
-    //~funcarr() {
-    //    
-    //    if (arr != nullptr) {
-    //        delete[] arr;
-    //    }
-    //    if (settingarr != nullptr) {
-    //        delete[] settingarr;
+
+
+
+int main()
+{
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+
+
+    int COL = pow(2, 5);
+    int ROW = pow(2, 5);
+    constexpr auto FRAMERATE = 5;
+    constexpr auto SKIPFRAMES = 1;
+
+    setmasks(COL, ROW);
+    Pixel*** arr = new Pixel * *[COL];
+    for (int i = 0; i < COL; i++) {
+        arr[i] = new Pixel * [ROW];
+    }
+    for (int i = 0; i < COL; i++) {
+        for (int j = 0; j < ROW; j++) {
+            arr[i][j] = new Void;
+        }
+    }
+    //for (int i = 0; i < COL; i += 2) {
+    //    for (int j = 0; j < ROW; j++) {
+    //        arr[i][j] = new BasicMat;
+    //        arr[i][j]->type = SAND;
     //    }
     //}
-    void doupdatesg(vector<pair<updatesets, vector<pair<int, int>>>> a) {
-        for (pair<updatesets, vector<pair<int, int>>> n : a) {
-            toupdatesg.push_back(n.first, n.second);
-        }
-    }
-    void addell(vector<pair<pair<int, int>, unsigned char>> f, vector<U> f2,
-        vector<pair<updatesets, vector<pair<int, int>>>> toupdates1,
-        vector<pair<conditionchar, pair<int, int>>> condition, bool breakontrue1= false,bool reverceapply1=false) {
-        array<pair<pair<int, int>, pair<U, unsigned char>>, Funcsize> func;
-        cout << '1';
-        if (f.size() != f2.size()) cout << "ERROR AT ADDELL";
-        for (int i = 0; i < f.size(); i++) {
-            func[i].first=f[i].first;
-            func[i].second.second = f[i].second;
-            func[i].second.first = f2[i];
-        }
-        func2d<Funcsize> a;
-        a.condition = condition;
-        a.toupdates.create(toupdates1);
-        a.breakontrue = breakontrue1;
-        a.reverceapply = reverceapply1;
-        a.size = f.size();
-        a.func = func;
-        settingarr.at(size1) = a;
-        size1++;
-    }
-    void addell(pair<int, int> cords, vector<pair<updatesets, vector<pair<int, int>>>> toupdates1,
-        vector<pair<conditionchar, pair<int, int>>> condition, bool breakontrue1= false) {
-        func2d<1> a;
-        a.condition = condition;
-        a.toupdates.create(toupdates1);
-        a.breakontrue = breakontrue1;
-        a.reverceapply = false;
-        pair < pair<int, int>, pair<U, unsigned char>> h;
-        h.first = cords;
-        h.second.second = 3;
-        a.func[0] = h;
 
-        settingarr.at(size1) = a;
-        size1++;
+    //for (int j = 1; j < 5; j++) {
+    //    arr[10][j] = new BasicMat;
+    //    arr[10][j]->type = BEDROCK;
+    //}
+    //for (int j = 10; j < 16; j++) {
+    //    arr[10][j] = new BasicMat;
+    //    arr[10][j]->type = BEDROCK;
+    //}
+    //for (int i = 0; i < COL; i++) {
+    //    arr[i][0] = new BasicMat;
+    //    arr[i][0]->type = BEDROCK;
+    //}
+    //for (int i = 0; i < COL; i++) {
+    //    arr[i][6] = new BasicMat;
+    //    arr[i][6]->type = BEDROCK;
+    //}
+    //for (int i = 0; i < COL; i++) {
+    //    arr[i][8] = new BasicMat;
+    //    arr[i][8]->type = BEDROCK;
+    //}
+    //for (int i = 0; i < COL; i++) {
+    //    arr[i][15] = new BasicMat;
+    //    arr[i][15]->type = BEDROCK;
+    //}
+
+    for (int i = 0; i < COL-1; i++) {
+        for (int j = 3; j < 14; j++) {
+            arr[i][j] = new Counuctor;
+            arr[i][j]->type = COPPER;
+        }
+
+    }
+    for (int i = 0; i < COL -1; i++) {
+        for (int j = 0; j < 2; j++) {
+            arr[i][j] = new Counuctor;
+            arr[i][j]->type = IRON;
+        }
+
     }
 
-    int size() {
-        return size1;
-    };
-    array<pair<pair<int, int>, pair<U, unsigned char>>, Funcsize> funb(int i) {
-        if (i < size1) {
-            return settingarr[i].func;
-        }
-        else {
-            cout << "ERROR OUT OF INDEX FUNCB\n";
-        }
-    };
-    vector<pair<conditionchar, pair<int, int>>>& cond(int i) {
-        if (i < size1) {
-            return (settingarr[i].condition);
-        }
-        else {
-            cout << "ERROR OUT OF INDEX COND";
-        }
-    };
-    toupdate& doupdate(int i) {
-        if (i < size1) {
-            return (settingarr[i].toupdates);
-        }
-        else {
-            cout << "ERROR OUT OF INDEX DOUPDATE";
-        }
-    };
-    bool breakontrue(int i) {
-        if (i < size1) {
-            return settingarr[i].breakontrue;
-        }
-        else {
-            cout << "ERROR OUT OF INDEX breakontrue";
-        }
-    }
-    bool reverceapply(int i) {
-        if (i < size1) {
-            return settingarr[i].reverceapply;
-        }
-        else {
-            cout << "ERROR OUT OF INDEX breakontrue";
-        }
-    }
-    int size(int i) {
-        if (i < size1) {
-            return settingarr[i].size;
-        }
-        else {
-            cout << "ERROR OUT OF INDEX breakontrue";
-        }
-    }
-    toupdate& doupdateg() {
-        return (toupdatesg);
-    };
-};
+    //functions
+    funcexunit<3, 1> sandfall;
+
+    sandfall.cond1 = issimplefallable;
+    sandfall.func.doupdatesg({
+        { FLOATING, { {0,1},{0,-1} }},
+        { FALLING, { {-1,1},{-1,-1},{-1,0}}},
+        });
+    //cout << sandfall.func.toupdatesg.toupdates[1].size();
+
+    sandfall.func.addell(
+        { 1, 0 },
+        { 
+        { FALLING, {{1,0}} },
+        { TERMAL, {{1,0}} },
+        },
+        { {isair,{1,0}} },
+        true);
+
+    sandfall.func.addell(
+        { 1, 1 },
+        { 
+        {FALLING, { {1,1} }}, 
+        { TERMAL, {{1,1}} },
+        },
+        { {isair,{1,1}},{isair,{0,1}} },
+        true);
+
+    sandfall.func.addell(
+        { 1, -1 },
+        { 
+        {FALLING, { {1,-1} } }, 
+        { TERMAL, {{1,-1}} },
+        },
+        { {isair,{1,-1}},{isair,{0,-1}} },
+        true);
 
 
-//derivative of Pixel with coords of change
-struct updatee {
-    int x, y;
-    unsigned char typeoffunc;
-    union {
-        Changeb b;
-        Changei i;
-        Changef f;
-        Changes s;
-        Changeid id;
-        Changefd fd;
-    } data;
-};
 
-//running array of if`s
-bool runcondarr(vector<pair<conditionchar, pair<int, int>>>& a, Pixel*** arr, int col, int row, int x, int y) {
-    for (pair<conditionchar, pair<int, int>> i : a) {
-        //cout << "g4";
-        //cout << i.first(arr[i.second.first][i.second.second], arr[x][y]);
-        if (!i.first(getvalue(arr, i.second.first + x, i.second.second + y), arr[x][y])) return false;
+
+    funcexunit<2, 1> waterfall;
+    waterfall.cond1 = issimplefloatable1;
+    waterfall.func.doupdatesg({
+        { FLOATING, { {0,1},{0,-1} }},
+        { FALLING, { {-1,1},{-1,-1},{-1,0}}},
+        });
+
+    waterfall.func.addell(
+        { 0, 1 },
+        { { TERMAL, {{0,1}} }, },
+        { {isair,{0,1}},{issimplefloatable,{1,0}} },
+        true);
+
+    waterfall.func.addell(
+        { 0, -1 },
+        { { TERMAL, {{0,-1}} }, },
+        { {isair,{0,-1}},{issimplefloatable,{1,0}} },
+        true);
+   
+
+    vector<U> temp1 = {};
+    U* a = new U;
+    temp1.push_back(*a);
+
+    vector<U> temp4 = {};
+    temp4.push_back(*a);
+    temp4.push_back(*a);
+    temp4.push_back(*a);
+    temp4.push_back(*a);
+
+    funcexunit<3, 4> termal;
+    termal.cond1 = instvoid1;
+    termal.func.doupdatesg({
+        { TERMAL, {{0,0}} },
+        });
+
+    temp4[0].fd=termalexcange;
+    temp4[1].fd = termalexcange;
+    temp4[2].fd = termalexcange;
+    temp4[3].fd = termalexcange;
+    termal.func.addell(
+        { {{0,1},{5}},{{0,-1},{5}},{{1,0},{5}},{{-1,0},{5}} },
+        temp4,
+        {},
+        {},
+        false,
+        true
+        );
+    temp1[0].i = melt;
+    termal.func.addell(
+        { {{0,0},{1}} },
+        temp1,
+        { {EVERYTHING, { {0,0} } } },
+        { {canmelt,{0,0}} },
+        true
+    );
+    temp1[0].i = solidify;
+    termal.func.addell(
+        { {{0,0},{1}} },
+        temp1,
+        { {EVERYTHING, { {0,0} } } },
+        { {cansolidify,{0,0}} },
+        true
+    );
+
+    vector<U> temp2 = {};
+    temp2.push_back(*a);
+    temp2.push_back(*a);
+
+
+
+    funcexunit<5, 2> charge;
+    charge.cond1 = ischarge1;
+    charge.func.doupdatesg({ {ELCOLDOWNS, { {0,0} } } });
+
+    temp1[0].b = charging;
+
+    charge.func.addell(
+        { {{0,1},{0}} },
+        temp1,
+        { {ELECTRISITY, { {0,1} } } },
+        { {inconductor,{0,1}} }
+    );
+    charge.func.addell(
+        { {{0,-1},{0}} },
+        temp1,
+        { {ELECTRISITY, { {0,-1} } } },
+        { {inconductor,{0,-1}} }
+    );
+    charge.func.addell(
+        { {{1,0},{0}} },
+        temp1,
+        { {ELECTRISITY, { {1,0} } } },
+        { {inconductor,{1,0}} }
+    );
+    charge.func.addell(
+        { {{-1,0},{0}} },
+        temp1,
+        { {ELECTRISITY, { {-1,0} } } },
+        { {inconductor,{-1,0}} }
+    );
+
+    temp2[0].b = discharging;
+    temp2[1].b = coolcharging;
+    charge.func.addell(
+        { {{0,0},{0}},{{0,0},{0}} },
+        temp2,
+        {},
+        {}
+    );
+
+    temp1[0].b = discoolcharging;
+    funcexunit<1, 1> discoolcharge;
+    discoolcharge.cond1 = iscoolcharge1;
+    discoolcharge.func.addell(
+        { {{0,0},{0}} },
+        temp1,
+        {},
+        {}
+    );
+        //arr[1][0] = new BasicMat;
+        //arr[1][0]->type = COPPER;
+
+    int gg = 0;
+    int i = 0;
+    auto frame = chrono::high_resolution_clock::now();
+    auto endframe = chrono::high_resolution_clock::now();
+    pairset updateset(UPDATESETCOUNT.count, COL, ROW);
+    vector<updatee> changeset;
+
+    BasicMat Examplesand;
+    Examplesand.type = SAND;
+
+    BasicMat Examplewater;
+    Examplewater.type = WATER;
+
+    Counuctor hotiron;
+    hotiron.type = IRON;
+    hotiron.t = 1999;
+
+    Counuctor electroiron;
+    electroiron.type = IRON;
+    electroiron.charge = true;
+
+
+    //auto before = chrono::high_resolution_clock::now();
+    while (!gg) {
+        frame = chrono::high_resolution_clock::now();
+        if(!(i%SKIPFRAMES)){
+            //printboardtemprature(arr, COL, ROW);
+            printboard(arr, COL, ROW);
+        }
+        update(arr, COL, ROW, updateset, termal, changeset, TERMAL,true);
+        update(arr, COL, ROW, updateset, discoolcharge, changeset, ELCOLDOWNS);
+        update(arr, COL, ROW, updateset, charge, changeset, ELECTRISITY);
+        applychangeset(arr, COL, ROW, changeset);
+        update(arr, COL, ROW, updateset, sandfall, changeset, FALLING);
+        update(arr, COL, ROW, updateset, waterfall, changeset, FLOATING);
+        
+        applychangeset(arr, COL, ROW, changeset);
+        //pointsetBasicMat(arr, COL, ROW, 3, 3, { FALLING }, updateset, Examplesand);
+        //pointsetBasicMat(arr, COL, ROW, 3, 13, { WATERFALL }, updateset, Examplewater);
+        pointsetBasicMat(arr, COL, ROW, 1, 9, { TERMAL }, updateset, hotiron);
+        pointsetBasicMat(arr, COL, ROW, 30, 1, { ELECTRISITY }, updateset, electroiron);
+        updateset.refresh();
+        endframe = chrono::high_resolution_clock::now();
+        std::this_thread::sleep_for(std::chrono::microseconds(1000000 / FRAMERATE - (chrono::duration_cast<chrono::microseconds>(endframe - frame).count())));
+
+        //if (i == 8) {
+        //    auto end = chrono::high_resolution_clock::now();
+        //    cout << "time:" << chrono::duration_cast<chrono::microseconds>(end - before).count() << endl;
+        //}
+        i++;
     }
-    return true;
 }
 
-//structure for adding updates(not linked to "updatee") for next step
-struct newupdatesett {
-    bool** cleararr = nullptr;
-    newupdatesett(int col, int row) {
-        cleararr = new bool* [col];
-        for (int i = 0; i < col; i++) {
-            cleararr[i] = new bool[row];
-            //cout << cleararr[i];
-            for (int j = 0; j < row; j++) {
-                cleararr[i][j] = false;
-            }
-        }
-        //print(cleararr, col, row);
-    }
-    vector<pair<int, int>> arr;
-    void push_back(pair<int, int> input) {
-        //cout << "g6";
-        if (!cleararr[input.first][input.second]) {
-            arr.push_back(input);
-            cleararr[input.first][input.second] = true;
-        }
-        //cout << "g7";
-    }
-    void clear1() {
-        for (pair<int, int> a : arr) {
-            cleararr[a.first][a.second] = false;
-        }
-        arr.clear();
-    }
-};
-//pair of newupdateset and old updateset
-struct pairset {
+// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
+// Debug program: F5 or Debug > Start Debugging menu
 
-    vector<newupdatesett> ns;
-    vector<vector< pair<int, int>>> os;
-    pairset(int len, int col, int row) {
-        for (int i = 0; i < len; i++) {
-            newupdatesett* aboba = new newupdatesett{ col,row };
-            os.push_back({});
-            ns.push_back(*aboba);
-            for (int k = 0; k < col; k++) {
-                for (int j = 0; j < row; j++) {
-                    os[i].push_back({ k,j });
-
-                }
-            }
-        }
-    }
-    void refresh() {
-        for (int i = 0; i < ns.size(); i++) {
-            if(i!=EVERYTHING) os[i] = ns[i].arr;
-        }
-        for (int i = 0; i < ns.size(); i++) {
-            if (i != EVERYTHING)
-            for (pair<int,int> a1: ns[EVERYTHING].arr) {
-                os[i].push_back(a1);
-            }
-        }
-        for (int i = 0; i < ns.size(); i++) {
-            ns[i].clear1();
-        }
-    }
-};
-
-
-//applying 1 change io 1 pixel
-void applychange(Pixel***& arr, int col, int row, updatee& a) {
-    //cout <<"A: " <<static_cast<int>((*(Changei*)a.a).path);
-    switch (a.typeoffunc)
-    {
-    case(0):
-        (arr[a.x][a.y])->writebit((a.data.b).path, (a.data.b).value);
-        break;
-    case(1):
-        (arr[a.x][a.y])->writeint((a.data.i).path, (a.data.i).value);
-        break;
-    case(2):
-        //cout << "value: " << ((a.data.f).value)<< endl;
-        (arr[a.x][a.y])->writefloat((a.data.f).path, (a.data.f).value);
-        break;
-    case(3):
-        //cout << "g1";
-        //cout << "first"<< "x"<<a.data.s.x<<"y"<< a.data.s.y << "   " << "second"<<"x"<<a.x<<"y"<<a.y << endl;
-        swap(arr[a.data.s.x][a.data.s.y], arr[a.x][a.y]);
-        //cout << "first" << "x" << a.data.s.x << "y" << a.data.s.y << "   " << "second" << "x" << a.x << "y" << a.y << endl;
-        break;
-    case(4):
-        //cout << "value: " << ((a.data.f).value)<< endl;
-        (arr[a.x][a.y])->writedint((a.data.i).path, (a.data.i).value);
-        break;
-    case(5):
-        //cout << "value: " << ((a.data.f).value)<< endl;
-        (arr[a.x][a.y])->writedfloat((a.data.f).path, (a.data.f).value);
-        //cout << "a";
-        break;
-    default:
-        cout << "ERROR AT APPLYING CHANGE VALUE";
-        break;
-    }
-}
-
-//running array of functions
-template <int Size, int Funcsize>
-void saferunup(Pixel*** arr, int col, int row, int x, int y, funcarr<Size, Funcsize>& a,
-    vector<newupdatesett>& newupdateset, vector<updatee>& changeset) {
-    updatee upd = {};
-    int d = a.size();
-    int start = true;
-    int i2 = 0;
-    Pixel* initialpixel = getvalue(arr, x, y);
-    for (int i = 0; d > i; i++) {
-        //cout << "a";
-
-        if (runcondarr(a.cond(i), arr, col, row, x, y)) {
-            //cout << "g3";
-            for (int u = 0; u < a.size(i);u++) {
-                const pair<pair<int, int>, pair<U, unsigned char>>& k = a.funb(i)[u];
-                    upd.x = (x + k.first.first) & maskx;
-                    upd.y = (y + k.first.second) & masky;
-                switch (k.second.second)
-                {
-                case(0):
-                    //b.a = new ;
-                    upd.data.b = (k.second.first.b)(arr[upd.x][upd.y], initialpixel);
-                    upd.typeoffunc = 0;
-                    break;
-                case(1):
-                    upd.data.i = (k.second.first.i)(arr[upd.x][upd.y], initialpixel);
-                    upd.typeoffunc = 1;
-                    break;
-                case(2):
-                    upd.data.f = (k.second.first.f)(arr[upd.x][upd.y], initialpixel);
-                    upd.typeoffunc = 2;
-                    //cout << "change tempr:" << upd.data.f.value<<endl;
-                    break;
-                case(3):
-                    //cout << "c1";
-                    upd.data.s = { x, y };
-                    upd.typeoffunc = 3;
-                    break;
-                case(4):
-                    upd.data.id = (k.second.first.id)(arr[upd.x][upd.y], initialpixel);
-                    upd.typeoffunc = 4;
-                    break;
-                case(5):
-                    upd.data.fd = (k.second.first.fd)(arr[upd.x][upd.y], initialpixel);
-                    //cout << "data:"<<upd.data.fd.value<<endl;
-                    upd.typeoffunc = 5;
-                    break;
-                default:
-                    cout << "ERROR AT NAME OF FUCNTION";
-                    break;
-                }
-                if (a.reverceapply(i)) {
-                    upd.x = x & maskx;
-                    upd.y = y & masky;
-                }
-                changeset.push_back(upd);
-            }
-            if(start){
-            i2 = 0;
-            for (updatesets j : a.doupdateg().updatesetsss) {
-                for (pair<int, int> k : a.doupdateg().toupdates[i2]) {
-                    newupdateset[j].push_back({ (x + k.first) & maskx ,(y + k.second) & masky });
-                    //print(k);
-                }
-                i2++;
-            }
-            start = false;
-            }
-
-            i2 = 0;
-            for (updatesets j : a.doupdate(i).updatesetsss) {
-                for (pair<int, int> k : a.doupdate(i).toupdates[i2]) {
-                    newupdateset[j].push_back({ (x + k.first) & maskx ,(y + k.second) & masky });
-                }
-                i2++;
-            }
-
-            //cout << "g5";
-            //cout << "a: " << static_cast<int>(in.path)<<endl;
-            //cout << "a2: " << static_cast<int>((*(Changei*)b.a).path)<<endl;
-
-            if (a.breakontrue(i)) return;
-            //cout << "a3: " << static_cast<int>((changeset[0].data.i).path) << endl;
-            /*cout << "a22: " << static_cast<int>((*(Changei*)b.a).path) << endl;*/
-        }
-        //cout << "Q:: " << a.x(0) << endl;
-    }
-    //before1+=(clock()- before2);
-    return;
-}
-
-//function with condition to trigger it 
-template <int Size, int Funcsize>
-struct funcexunit {
-    vector<updatesets> whatupdetesetuse;
-    funcarr<Size, Funcsize> func;
-    conditionchar1 cond1;
-};
-//checking for target pixel paramiters among Pixels marked to update
-
-
-
-
-
-//loops applying
-void applychangeset(Pixel*** arr, int col, int row, vector<updatee>& changeset) {
-    for (int i = 0; i < changeset.size(); i++) {
-        //cout << changeset[0].typeoffunc << endl;
-        applychange(arr, col, row, changeset[i]);
-    }
-    changeset.clear();
-}
-
-//checking all of board for condition
-template <int Size, int Funcsize>
-void checkfor(Pixel*** arr, int col, int row, vector<newupdatesett>& newupdateset,
-    funcexunit<Size, Funcsize>& funcs, vector<updatee>& changeset) {
-    auto before1 = chrono::high_resolution_clock::now();;
-    auto clockc = chrono::high_resolution_clock::now();;
-    for (int i = 0; i < col; i++) {
-        for (int j = 0; j < row; j++) {
-            if (funcs.cond1(arr[i][j])) {
-                //cout << "g2";
-                //cout << "e:: "<< funcs[0].func.x(0) << endl;
-                saferunup(arr, col, row, i, j, funcs.func, newupdateset, funcs.nuscords, changeset);
-                //cout << "a41: " << static_cast<int>((*(Changei*)changeset[0].a).path) << endl;
-                //cout << "E:: " << funcs[0].func.x(0) << endl;
-            }
-
-        }
-    }
-    //cout << "a44: " << static_cast<int>((*(Changei*)changeset[0].a).path) << endl;
-    //cout << "E2:: " << funcs[0].func.x(0) << endl;
-//cout << "E3:: " << funcs[0].func.x(0) << endl;
-    auto end = chrono::high_resolution_clock::now();;
-    //cout << chrono::duration_cast<chrono::microseconds>(end - before1).count() << endl;
-    return;
-}
-
-//checking only updatesets for condition
-template <int Size, int Funcsize>
-void update(Pixel*** arr, int col, int row,
-    pairset& pairupdateset,
-    funcexunit<Size, Funcsize>& funcs, vector<updatee>& changeset, updatesets whatupdetesetuse,bool instantapply=false) {
-        for (pair<int, int> n : pairupdateset.os[whatupdetesetuse]) {
-                if (funcs.cond1(arr[n.first][n.second])) {
-                    saferunup(arr, col, row, n.first, n.second, funcs.func, (pairupdateset.ns), changeset);
-                }
-        }
-        if (instantapply) applychangeset(arr, col, row, changeset);
-    return;
-}
-
-
-//template<typename T>
-//void saferun(T**& arr, int col, int row, int x, int y, funcarr& a) {
-//    int d = a.size();
-//    for (int i = 0; d > i; i++) {
-//        if (not(((a.x(i) + x >= col) or (a.y(i) + y >= row)) or ((a.x(i) + x < 0) or (a.y(i) + y < 0)))) {
-//            if (a.cond(i)) {
-//                arr[x + a.x(i)][y + a.y(i)] = a.func(i)(arr[x + a.x(i)][y + a.y(i)]);
-//            }
-//        }
-//    }
-//    return;
-//}
-//bool scanfor(char**& arr, int col, int row, char target, funcarr& func) {
-//    bool a = false;
-//    for (int i = 0; col > i; i++) {
-//        for (int j = 0; row > j; j++) {
-//            if (arr[i][j] == target) {
-//                a = true;
-//                saferun(arr, col, row, i, j, func);
-//            }
-//        }
-//    }
-//    return a;
-//}
+// Tips for Getting Started: 
+//   1. Use the Solution Explorer window to add/manage files
+//   2. Use the Team Explorer window to connect to source control
+//   3. Use the Output window to see build output and other messages
+//   4. Use the Error List window to view errors
+//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
+//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
