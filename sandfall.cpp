@@ -12,32 +12,83 @@
 #include <thread>
 #include <cstdlib>
 #include "basicslib.h"
-#include "Header.h"
+#include "safepixel1,2,5.h"
+#include "constdata.h"
 
-bool isair(Pixel* a, Pixel* b) {
+static bool isair(Pixel* a, Pixel* b) {
     return (a)->getint(TYPEV) == VOIDM;
 }
-bool issand1(Pixel* a) {
-    return (a)->getint(TYPEV) == SAND;
+static bool issimplefallable(Pixel* a) {
+    return constb(a->type,IS_SIMPLEFALLABLE);
 }
-bool iswater1(Pixel* a) {
-    return (a)->getint(TYPEV) == WATER;
+static bool issimplefloatable1(Pixel* a) {
+    return constb(a->type, IS_SIMPLEFLOATABLE);
 }
-bool iswater(Pixel* a, Pixel* b) {
-    return (a)->getint(TYPEV) == WATER;
+static bool issimplefloatable(Pixel* a, Pixel* b) {
+    return constb(a->type, IS_SIMPLEFLOATABLE);
 }
-Changeb testf(Pixel* a, Pixel* b) {
-    return { 0 };
+static Changefd termalexcange(Pixel* a, Pixel* b) {
+    float ret = (a->getfloat(TEMPRATURE)-b->getfloat(TEMPRATURE))
+        *constf((a->type), THERMAL_CONDUCIVITY) * constf((b->type), THERMAL_CONDUCIVITY);
+    //cout << "datepre: " << ret << endl;
+    return { TEMPRATURE,ret};
 }
-void printboard(Pixel*** arr, int COL, int ROW) {
+static Changei melt(Pixel* a, Pixel* b) {
+    //cout << "melt_type: " << consti(a->type, MELT_TYPE) << endl;
+    return { TYPEV,consti(a->type,MELT_TYPE)};
+}
+static Changei solidify(Pixel* a, Pixel* b) {
+    return { TYPEV,consti(a->type,SOLID_TYPE)};
+}
+static bool canmelt(Pixel* a, Pixel* b) {
+    //cout << "melt_type: " << consti(a->type, MELT_TYPE) << endl;
+    return ((consti(a->type, MELT_TYPE) != -1) and (a->getfloat(TEMPRATURE) >= constf(a->type, MELT_TEMPRATURE)));
+}
+static bool cansolidify(Pixel* a, Pixel* b) {
+    return consti(a->type, SOLID_TYPE) != -1 and a->getfloat(TEMPRATURE) <= constf(a->type, SOLID_TEMPRATURE);
+}
+static bool instvoid1(Pixel* a) {
+    return (consti(a->type, TYPE) != VOIDC);
+}
+
+char displaypixel(Pixel* a) {
+    switch (a->type) {
+    case VOIDM:
+        return ' ';
+        break;
+    case BEDROCK:
+        return 'B';
+        break;
+    case IRON:
+        return 'I';
+        break;
+    case COPPER:
+        return 'C';
+        break;
+    case MOLTEN_COPPER:
+        return 'L';
+        break;
+    case MOLTEN_IRON:
+        return 'L';
+        break;
+    case SAND:
+        return 'S';
+        break;
+    case WATER:
+        return 'W';
+        break;
+    default:
+        std::cout << "UNDISPLAYABLE PIXEL";
+        return ' ';
+    }
+
+};
+
+static void printboard(Pixel*** arr, int COL, int ROW) {
     string output;
     for (int i = 0; COL > i; i++) {
         for (int j = 0; ROW > j; j++) {
-            output += static_cast<char>((arr[i][j]->getint(TYPEV)));
-            if (output.back() == '\0') {
-                output.pop_back();
-                output += ' ';
-            }
+            output += displaypixel(arr[i][j]);
             output += ' ';
         }
         output += "| \n";
@@ -50,8 +101,22 @@ void printboard(Pixel*** arr, int COL, int ROW) {
     cout << output;
     output.clear();
 }
+static void printboardtemprature(Pixel*** arr, int COL, int ROW) {
+    for (int i = 0; COL > i; i++) {
+        for (int j = 0; ROW > j; j++) {
+            cout<< ((arr[i][j]->getfloat(TEMPRATURE)));
+            cout << ' ';
+        }
+        cout << "| \n";
+    }
+    for (int j = 0; ROW > j; j++) {
+        cout << "--";
+    }
+    cout << endl;
+}
 
-void pointsetBasicMat(Pixel*** arr, int COL, int ROW, int x, int y, vector<updatesets> a, pairset& updateset, BasicMat b) {
+
+static void pointsetBasicMat(Pixel*** arr, int COL, int ROW, int x, int y, vector<updatesets> a, pairset& updateset, BasicMat b) {
     delete arr[x & maskx][y & masky];
     arr[x & maskx][y & masky] = new BasicMat{ b };
     for (updatesets k : a) {
@@ -70,7 +135,7 @@ int main()
 
     int COL = pow(2, 4);
     int ROW = pow(2, 4);
-    constexpr auto FRAMERATE = 20;
+    constexpr auto FRAMERATE = 2;
 
     setmasks(COL, ROW);
     Pixel*** arr = new Pixel * *[COL];
@@ -89,111 +154,167 @@ int main()
     //    }
     //}
 
-    for (int j = 1; j < 5; j++) {
-        arr[10][j] = new BasicMat;
-        arr[10][j]->type = BEDROCK;
-    }
-    for (int j = 10; j < 16; j++) {
-        arr[10][j] = new BasicMat;
-        arr[10][j]->type = BEDROCK;
-    }
-    for (int i = 0; i < COL; i++) {
-        arr[i][0] = new BasicMat;
-        arr[i][0]->type = BEDROCK;
-    }
-    for (int i = 0; i < COL; i++) {
-        arr[i][6] = new BasicMat;
-        arr[i][6]->type = BEDROCK;
-    }
-    for (int i = 0; i < COL; i++) {
-        arr[i][8] = new BasicMat;
-        arr[i][8]->type = BEDROCK;
-    }
-    for (int i = 0; i < COL; i++) {
-        arr[i][15] = new BasicMat;
-        arr[i][15]->type = BEDROCK;
+    //for (int j = 1; j < 5; j++) {
+    //    arr[10][j] = new BasicMat;
+    //    arr[10][j]->type = BEDROCK;
+    //}
+    //for (int j = 10; j < 16; j++) {
+    //    arr[10][j] = new BasicMat;
+    //    arr[10][j]->type = BEDROCK;
+    //}
+    //for (int i = 0; i < COL; i++) {
+    //    arr[i][0] = new BasicMat;
+    //    arr[i][0]->type = BEDROCK;
+    //}
+    //for (int i = 0; i < COL; i++) {
+    //    arr[i][6] = new BasicMat;
+    //    arr[i][6]->type = BEDROCK;
+    //}
+    //for (int i = 0; i < COL; i++) {
+    //    arr[i][8] = new BasicMat;
+    //    arr[i][8]->type = BEDROCK;
+    //}
+    //for (int i = 0; i < COL; i++) {
+    //    arr[i][15] = new BasicMat;
+    //    arr[i][15]->type = BEDROCK;
+    //}
+
+    for (int i = 0; i < COL-1; i++) {
+        for (int j = 0; j < 3; j++) {
+            arr[i][j] = new BasicMat;
+            arr[i][j]->type = COPPER;
+        }
+
     }
 
     //update templates
-    vector<pair<int, int>> cross;
-    cross.push_back({ 0, 0 });
-    cross.push_back({ 1, 0 });
-    cross.push_back({ -1, 0 });
-    cross.push_back({ 0, 1 });
-    cross.push_back({ 0, -1 });
+    //vector<pair<int, int>> cross;
+    //cross.push_back({ 0, 0 });
+    //cross.push_back({ 1, 0 });
+    //cross.push_back({ -1, 0 });
+    //cross.push_back({ 0, 1 });
+    //cross.push_back({ 0, -1 });
 
     //functions
-    funcexunit<3, 1, 2, 3> sandfall;
+    funcexunit<3, 1> sandfall;
 
-    sandfall.cond1 = issand1;
+    sandfall.cond1 = issimplefallable;
     sandfall.func.doupdatesg({
-        { FALLING, { {0,1},{0,-1} }},
-        { FALLING, { {-1,1},{-1,-1},{-1,0}}}
+        { FLOATING, { {0,1},{0,-1} }},
+        { FALLING, { {-1,1},{-1,-1},{-1,0}}},
         });
     //cout << sandfall.func.toupdatesg.toupdates[1].size();
 
     sandfall.func.addell(
         { 1, 0 },
-        { { FALLING, {{1,0}} } },
+        { 
+        { FALLING, {{1,0}} },
+        { TERMAL, {{1,0}} },
+        },
         { {isair,{1,0}} },
         true);
 
     sandfall.func.addell(
         { 1, 1 },
-        { {FALLING, { {1,1} }} },
+        { 
+        {FALLING, { {1,1} }}, 
+        { TERMAL, {{1,1}} },
+        },
         { {isair,{1,1}},{isair,{0,1}} },
         true);
 
     sandfall.func.addell(
         { 1, -1 },
-        { {FALLING, { {1,-1} } } },
+        { 
+        {FALLING, { {1,-1} } }, 
+        { TERMAL, {{1,-1}} },
+        },
         { {isair,{1,-1}},{isair,{0,-1}} },
         true);
 
 
-    sandfall.whatupdetesetuse = { FALLING };
 
 
-
-    funcexunit<5, 1, 10, 10> waterfall;
-    waterfall.cond1 = iswater1;
+    funcexunit<2, 1> waterfall;
+    waterfall.cond1 = issimplefloatable1;
     waterfall.func.doupdatesg({
         { FLOATING, { {0,1},{0,-1} }},
         { FALLING, { {-1,1},{-1,-1},{-1,0}}},
         });
 
-
-    waterfall.func.addell(
-        { 1, 0 },
-        { {WATERFALL, { {1,0} } } },
-        { {isair,{1,0}} },
-        true);
-
-    waterfall.func.addell(
-        { 1, 1 },
-        { {WATERFALL, { {1,1} } } },
-        { {isair,{1,1}},{isair,{0,1}} },
-        true);
-
-    waterfall.func.addell(
-        { 1, -1 },
-        { {WATERFALL, { {1,-1} } } },
-        { {isair,{1,1}},{isair,{0,1}} },
-        true);
-
     waterfall.func.addell(
         { 0, 1 },
-        {},
-        { {isair,{0,1}},{iswater,{1,0}} },
+        { { TERMAL, {{0,1}} }, },
+        { {isair,{0,1}},{issimplefloatable,{1,0}} },
         true);
 
     waterfall.func.addell(
         { 0, -1 },
-        {},
-        { {isair,{0,-1}},{iswater,{1,0}} },
+        { { TERMAL, {{0,-1}} }, },
+        { {isair,{0,-1}},{issimplefloatable,{1,0}} },
         true);
+    
+    funcexunit<6, 1> termal;
+    termal.cond1 = instvoid1;
+    termal.func.doupdatesg({
+        { TERMAL, {{0,0}} },
+        });
 
-    waterfall.whatupdetesetuse = { WATERFALL };
+    vector<U> temp2 = {};
+    U* a = new U;
+    temp2.push_back(*a);
+    temp2[0].fd=termalexcange;
+    termal.func.addell(
+        { {{0,1},{5}} },
+        temp2,
+        {},
+        {},
+        false,
+        true
+        );
+    termal.func.addell(
+        { {{0,-1},{5}} },
+        temp2,
+        {},
+        {},
+        false,
+        true
+        );
+    termal.func.addell(
+        { {{1,0},{5}} },
+        temp2,
+        {},
+        {},
+        false,
+        true
+        );
+    termal.func.addell(
+        { {{-1,0},{5}} },
+        temp2,
+        {},
+        {},
+        false,
+        true
+        );
+
+    temp2[0].i = melt;
+    termal.func.addell(
+        { {{0,0},{1}} },
+        temp2,
+        { {EVERYTHING, { {0,0} } } },
+        { {canmelt,{0,0}} },
+        true
+    );
+    temp2[0].i = solidify;
+    termal.func.addell(
+        { {{0,0},{1}} },
+        temp2,
+        { {EVERYTHING, { {0,0} } } },
+        { {cansolidify,{0,0}} },
+        true
+    );
+
+
 
     int gg = 0;
     int i = 0;
@@ -203,8 +324,11 @@ int main()
     Examplesand.type = SAND;
     BasicMat Examplewater;
     Examplewater.type = WATER;
+    BasicMat hotiron;
+    hotiron.type = IRON;
+    hotiron.t = 999;
 
-    pairset updateset(10, COL, ROW);
+    pairset updateset(UPDATESETCOUNT.count, COL, ROW);
     //for (int i = 0; i < 10; i++) {
     //    updateset.os.push_back({});
     //}
@@ -213,23 +337,29 @@ int main()
 
     auto before = chrono::high_resolution_clock::now();
     while (!gg) {
-        printboard(arr, COL, ROW);
         frame = chrono::high_resolution_clock::now();
-        update(arr, COL, ROW, updateset, sandfall, changeset);
-        update(arr, COL, ROW, updateset, waterfall, changeset);
+        //printboardtemprature(arr, COL, ROW);
+        printboard(arr, COL, ROW);
+        //vector<funcexunit<3, 1>> temp = {sandfall};
+        update(arr, COL, ROW, updateset, termal, changeset, TERMAL);
+        update(arr, COL, ROW, updateset, sandfall, changeset, FALLING);
+        //vector<funcexunit<5, 1>> temp2 = {waterfall};
+        update(arr, COL, ROW, updateset, waterfall, changeset, FLOATING);
+        
         applychangeset(arr, COL, ROW, changeset);
-        pointsetBasicMat(arr, COL, ROW, 3, 3, { FALLING }, updateset, Examplesand);
+        //pointsetBasicMat(arr, COL, ROW, 3, 3, { FALLING }, updateset, Examplesand);
         //pointsetBasicMat(arr, COL, ROW, 3, 13, { WATERFALL }, updateset, Examplewater);
+        pointsetBasicMat(arr, COL, ROW, 0, 1, { TERMAL }, updateset, hotiron);
         updateset.refresh();
 
         endframe = chrono::high_resolution_clock::now();
         std::this_thread::sleep_for(std::chrono::microseconds(1000000 / FRAMERATE - (chrono::duration_cast<chrono::microseconds>(endframe - frame).count())));
 
-        //if (i == 32) {
+        //if (i == 8) {
         //    auto end = chrono::high_resolution_clock::now();
         //    cout << "time:" << chrono::duration_cast<chrono::microseconds>(end - before).count() << endl;
         //}
-        //i++;
+        i++;
     }
 }
 
