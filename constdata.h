@@ -24,10 +24,10 @@ enum matreals {
 	//IRON_ORE,
 
 	////solids
-	//IRON,
+	IRON,
 	//HEATSUPERCONDUCTOR,
 	//DISABLED_HSC,
-	//COPPER,
+	COPPER,
 	ANTIGRAVITY_PLATE,
 	BEDROCK,
 	//ICE,
@@ -40,8 +40,8 @@ enum matreals {
 	//MOLTEN_GLASS,
 	//MOLTEN_ORE,
 	//MOLTEN_SLAG,
-	//MOLTEN_IRON,
-	//MOLTEN_COPPER,
+	MOLTEN_IRON,
+	MOLTEN_COPPER,
 
 	////bombs
 	//TNT,
@@ -66,6 +66,8 @@ enum classes {
 };
 enum paramiterb {
 	IS_MOVABLE,
+	IS_SIMPLEFALLABLE,
+	IS_SIMPLEFLOATABLE,
 };
 enum paramiteri {
 	TYPE,
@@ -74,7 +76,6 @@ enum paramiteri {
 	SOLID_TYPE,
 };
 enum paramiterf {
-
 	THERMAL_CONDUCIVITY,
 	MELT_TEMPRATURE,
 	SOLID_TEMPRATURE,
@@ -95,7 +96,52 @@ enum variablef {
 
 	TEMPRATURE,
 };
+union Uv {
+	variableb bv;
+	variablei iv;
+	variablef fv;
+};
 
+vector<pair<Uv, unsigned char>> paramiterclasses(classes a){
+	vector<pair<Uv, unsigned char>> b;
+	switch (a)
+	{
+	case VOIDC:
+		for (int i = 0; i < 1; i++) {
+			b.push_back({});
+		}
+		b[0].first.iv = TYPEV;
+		b[0].second = 1;
+		break;
+	case BASICMAT:
+		for (int i = 0; i < 2; i++) {
+			b.push_back({});
+		}
+		b[0].first.iv = TYPEV;
+		b[0].second = 1;
+		b[1].first.fv = TEMPRATURE;
+		b[1].second = 2;
+		break;
+	case COUNDUCTOR:
+		for (int i = 0; i < 4; i++) {
+			b.push_back({});
+		}
+		b[0].first.iv = TYPEV;
+		b[0].second = 1;
+		b[1].first.fv = TEMPRATURE;
+		b[1].second = 2;
+		b[2].first.bv = POWER;
+		b[2].second = 0;
+		b[3].first.bv = ELCOLDOWN;
+		b[3].second = 0;
+		break;
+	case PARTICLE:
+		break;
+	default:
+		break;
+	}
+	return b;
+}
 int consti(matreals type, paramiteri selector) {
 	switch (type)
 	{
@@ -108,13 +154,8 @@ int consti(matreals type, paramiteri selector) {
 		case DENSITY:
 			return 0;
 			break;
-		case MELT_TYPE:
-			return -1;
-			break;
-		case SOLID_TYPE:
-			return -1;
-			break;
 		default:
+			return -1;
 			break;
 		}
 		break;
@@ -134,6 +175,7 @@ int consti(matreals type, paramiteri selector) {
 			return -1;
 			break;
 		default:
+			return -1;
 			break;
 		}
 		break;
@@ -153,6 +195,7 @@ int consti(matreals type, paramiteri selector) {
 			return -1;
 			break;
 		default:
+			return -1;
 			break;
 		}
 		break;
@@ -172,6 +215,7 @@ int consti(matreals type, paramiteri selector) {
 			return -1;
 			break;
 		default:
+			return -1;
 			break;
 		}
 		break;
@@ -184,13 +228,8 @@ int consti(matreals type, paramiteri selector) {
 		case DENSITY:
 			return 1000000;
 			break;
-		case MELT_TYPE:
-			return -1;
-			break;
-		case SOLID_TYPE:
-			return -1;
-			break;
 		default:
+			return -1;
 			break;
 		}
 		break;
@@ -213,21 +252,266 @@ int consti(matreals type, paramiteri selector) {
 			break;
 		}
 		break;
+	case IRON:
+		switch (selector)
+		{
+		case TYPE:
+			return COUNDUCTOR;
+			break;
+		case DENSITY:
+			return 40;
+			break;
+		case MELT_TYPE:
+			return MOLTEN_IRON;
+			//cout << 'a';
+			break;
+		case SOLID_TYPE:
+			break;
+		default:
+			break;
+		}
+		break;
+	case MOLTEN_IRON:
+		switch (selector)
+		{
+		case TYPE:
+			return BASICMAT;
+			break;
+		case DENSITY:
+			return 20;
+			break;
+		case MELT_TYPE:
+			return -1;
+			break;
+		case SOLID_TYPE:
+			return IRON;
+			break;
+		default:
+			break;
+		}
+	case COPPER:
+		switch (selector)
+		{
+		case TYPE:
+			return COUNDUCTOR;
+			break;
+		case DENSITY:
+			break;
+		case MELT_TYPE:
+			return MOLTEN_COPPER;
+			break;
+		case SOLID_TYPE:
+			break;
+		default:
+			break;
+		}
+	case MOLTEN_COPPER:
+		switch (selector)
+		{
+		case TYPE:
+			return BASICMAT;
+			break;
+		case DENSITY:
+			return 19;
+			break;	
+		case MELT_TYPE:
+			return -1;
+			break;
+		case SOLID_TYPE:
+			return COPPER;
+			break;
+		default:
+			break;
+		}
 	default:
 		cout << "ERROR AT TYPE FINDER";
 		break;
 	}
+	return -1;
 }
 
-//float constf(matreals type, paramiterf selector) {
-//
-//}
-//
-//bit constb(matreals type, paramiterb selector) {
-//
-//}
+float constf(matreals type, paramiterf selector) {
+	switch (type)
+	{
+	case VOIDM:
+		switch (selector)
+		{
+		case THERMAL_CONDUCIVITY:
+			return 0.01;
+			break;
+		case MELT_TEMPRATURE:
+			break;
+		case SOLID_TEMPRATURE:
+			break;
+		default:
+			break;
+		}
+		break;
+	case SAND:
+		break;
+	case ANTIGRAVITYSAND:
+		break;
+	case ANTIGRAVITY_PLATE:
+		break;
+	case BEDROCK:
+		break;
+	case WATER:
+		break;
+	case IRON:
+		switch (selector)
+		{
+		case THERMAL_CONDUCIVITY:
+			return 0.25;
+			break;
+		case MELT_TEMPRATURE:
+			return 2000;
+			break;
+		case SOLID_TEMPRATURE:
+			break;
+		default:
+			break;
+		}
+	default:
+		break;
+	case MOLTEN_IRON:
+		switch (selector)
+		{
+		case THERMAL_CONDUCIVITY:
+			return 0.2;
+			break;
+		case MELT_TEMPRATURE:
+			break;
+		case SOLID_TEMPRATURE:
+			break;
+		default:
+			break;
+		}
+	case COPPER:
+		switch (selector)
+		{
+		case THERMAL_CONDUCIVITY:
+			return 0.35;
+			break;
+		case MELT_TEMPRATURE:
+			return 500;
+			break;
+		case SOLID_TEMPRATURE:
+			break;
+		default:
+			break;
+		}
 
+	case MOLTEN_COPPER:
+		switch (selector)
+		{
+		case THERMAL_CONDUCIVITY:
+			return 0.35;
+			break;
+		case MELT_TEMPRATURE:
+			break;
+		case SOLID_TEMPRATURE:
+			return 500;
+			break;
+		default:
+			break;
+		}
+	}
+	
+	return -1;
+}
+
+bool constb(matreals type, paramiterb selector) {
+	switch (type)
+	{
+	case VOIDM:
+		break;
+	case SAND:
+		switch (selector)
+		{
+		case IS_MOVABLE:
+			break;
+		case IS_SIMPLEFALLABLE:
+			return true;
+			break;
+		default:
+			break;
+		}
+		break;
+	case ANTIGRAVITYSAND:
+		break;
+	case IRON:
+		break;
+	case ANTIGRAVITY_PLATE:
+		break;
+	case BEDROCK:
+		break;
+	case WATER:
+		switch (selector)
+		{
+		case IS_MOVABLE:
+			break;
+		case IS_SIMPLEFLOATABLE:
+			return true;
+			break;
+		case IS_SIMPLEFALLABLE:
+			return true;
+			break;
+		default:
+			break;
+		}
+		break;
+	case MOLTEN_COPPER:
+		switch (selector)
+		{
+		case IS_MOVABLE:
+			break;
+		case IS_SIMPLEFLOATABLE:
+			return true;
+			break;
+		case IS_SIMPLEFALLABLE:
+			return true;
+			break;
+		default:
+			break;
+		}
+		break;
+	case MOLTEN_IRON:
+		switch (selector)
+		{
+		case IS_MOVABLE:
+			break;
+		case IS_SIMPLEFLOATABLE:
+			return true;
+			break;
+		case IS_SIMPLEFALLABLE:
+			return true;
+			break;
+		default:
+			break;
+		}
+		break;
+	default:
+		break;
+	}
+	return false;
+}
 enum updatesets {
-	SANDFALL,
+	TERMAL,
+	FALLING,
+	FLOATING,
 	ELECTRISITY,
+	ELCOLDOWNS,
+	EVERYTHING,
 };
+
+
+struct UPDATESETCOUNTclass {
+	int count = 1;
+	UPDATESETCOUNTclass() {
+		for (int i = 0; i != EVERYTHING; i++) {
+			count++;
+		}
+	}
+};
+
+UPDATESETCOUNTclass UPDATESETCOUNT;
