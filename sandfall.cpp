@@ -50,9 +50,26 @@ static bool cansolidify(Pixel* a, Pixel* b) {
 static bool instvoid1(Pixel* a) {
     return (consti(a->type, TYPE) != VOIDC);
 }
-
-char displaypixel(Pixel* a) {
-    switch (a->type) {
+static bool inconductor1(Pixel* a) {
+    return (consti(a->type, TYPE) == COUNDUCTOR and !a->getbit(ELCOLDOWN));
+}
+static bool inconductor(Pixel* a, Pixel* b) {
+    return (consti(a->type, TYPE) == COUNDUCTOR and !a->getbit(ELCOLDOWN));
+}
+static Changeb charging(Pixel* a, Pixel* b) {
+    return { POWER,true };
+}
+static Changeb discharging(Pixel* a, Pixel* b) {
+    return { POWER,false };
+}
+static Changeb coolcharging(Pixel* a, Pixel* b) {
+    return { ELCOLDOWN,true };
+}
+static Changeb discoolcharging(Pixel* a, Pixel* b) {
+    return { ELCOLDOWN,false };
+}
+char pixelchar(int type) {
+    switch (type) {
     case VOIDM:
         return ' ';
         break;
@@ -81,25 +98,93 @@ char displaypixel(Pixel* a) {
         std::cout << "UNDISPLAYABLE PIXEL";
         return ' ';
     }
-
+}
+char pixelcolors(int type) {
+    switch (type) {
+    case VOIDM:
+        return 0;
+        break;
+    case BEDROCK:
+        return 8;
+        break;
+    case IRON:
+        return 7;
+        break;
+    case COPPER:
+        return 6;
+        break;
+    case MOLTEN_COPPER:
+        return 14;
+        break;
+    case MOLTEN_IRON:
+        return 6;
+        break;
+    case SAND:
+        return 14;
+        break;
+    case WATER:
+        return 9;
+        break;
+    default:
+        std::cout << "UNDISPLAYABLE PIXEL";
+        return ' ';
+    }
+}
+int termalcolors(float tempr) {
+    if (tempr < 200) {
+        return 0;
+    }
+    else if (tempr < 400) {
+        return 4;
+    }
+    else if (tempr < 600) {
+        return 12;
+    }
+    else if(tempr < 800){
+        return 6;
+    }
+    else if (tempr < 1000) {
+        return 14;
+    }
+    else {
+        return 15;
+    }
+}
+void displaypixel(Pixel* a) {
+    if (a->getbit(POWER)) {
+        SetColor(pixelcolors(a->type), 14);
+    }
+    else if (a->getbit(ELCOLDOWN)) {
+        SetColor(pixelcolors(a->type), 6);
+    }
+    else {
+        int t = termalcolors(a->getfloat(TEMPRATURE));
+        if (t == 0) {
+            SetColor(0, pixelcolors(a->type));
+        }
+        else {
+            SetColor(pixelcolors(a->type), t);
+        }
+    }
+    
+    cout << pixelchar(a->type);
+    SetColor(7, 0);
 };
 
 static void printboard(Pixel*** arr, int COL, int ROW) {
-    string output;
+    std::system("cls");
     for (int i = 0; COL > i; i++) {
         for (int j = 0; ROW > j; j++) {
-            output += displaypixel(arr[i][j]);
-            output += ' ';
+            displaypixel(arr[i][j]);
+            cout<< ' ';
         }
-        output += "| \n";
+        cout << "| \n";
     }
     for (int j = 0; ROW > j; j++) {
-        output += "--";
+        cout << "--";
     }
-    output += "\n";
-    //std::system("cls");
-    cout << output;
-    output.clear();
+    cout << '\n';
+    SetColor(7, 0);
 }
 static void printboardtemprature(Pixel*** arr, int COL, int ROW) {
     for (int i = 0; COL > i; i++) {
@@ -112,7 +197,7 @@ static void printboardtemprature(Pixel*** arr, int COL, int ROW) {
     for (int j = 0; ROW > j; j++) {
         cout << "--";
     }
-    cout << endl;
+    cout << '\n';
 }
 
 
@@ -130,12 +215,14 @@ static void pointsetBasicMat(Pixel*** arr, int COL, int ROW, int x, int y, vecto
 
 int main()
 {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
 
 
-
-    int COL = pow(2, 4);
-    int ROW = pow(2, 4);
-    constexpr auto FRAMERATE = 2;
+    int COL = pow(2, 5);
+    int ROW = pow(2, 5);
+    constexpr auto FRAMERATE = 5;
+    constexpr auto SKIPFRAMES = 1;
 
     setmasks(COL, ROW);
     Pixel*** arr = new Pixel * *[COL];
@@ -180,20 +267,12 @@ int main()
     //}
 
     for (int i = 0; i < COL-1; i++) {
-        for (int j = 0; j < 3; j++) {
+        for (int j = 3; j < 14; j++) {
             arr[i][j] = new BasicMat;
             arr[i][j]->type = COPPER;
         }
 
     }
-
-    //update templates
-    //vector<pair<int, int>> cross;
-    //cross.push_back({ 0, 0 });
-    //cross.push_back({ 1, 0 });
-    //cross.push_back({ -1, 0 });
-    //cross.push_back({ 0, 1 });
-    //cross.push_back({ 0, -1 });
 
     //functions
     funcexunit<3, 1> sandfall;
@@ -253,103 +332,148 @@ int main()
         { { TERMAL, {{0,-1}} }, },
         { {isair,{0,-1}},{issimplefloatable,{1,0}} },
         true);
-    
-    funcexunit<6, 1> termal;
+   
+
+    vector<U> temp1 = {};
+    U* a = new U;
+    temp1.push_back(*a);
+
+    vector<U> temp4 = {};
+    temp4.push_back(*a);
+    temp4.push_back(*a);
+    temp4.push_back(*a);
+    temp4.push_back(*a);
+
+    funcexunit<3, 4> termal;
     termal.cond1 = instvoid1;
     termal.func.doupdatesg({
         { TERMAL, {{0,0}} },
         });
 
-    vector<U> temp2 = {};
-    U* a = new U;
-    temp2.push_back(*a);
-    temp2[0].fd=termalexcange;
+    temp4[0].fd=termalexcange;
+    temp4[1].fd = termalexcange;
+    temp4[2].fd = termalexcange;
+    temp4[3].fd = termalexcange;
     termal.func.addell(
-        { {{0,1},{5}} },
-        temp2,
+        { {{0,1},{5}},{{0,-1},{5}},{{1,0},{5}},{{-1,0},{5}} },
+        temp4,
         {},
         {},
         false,
         true
         );
-    termal.func.addell(
-        { {{0,-1},{5}} },
-        temp2,
-        {},
-        {},
-        false,
-        true
-        );
-    termal.func.addell(
-        { {{1,0},{5}} },
-        temp2,
-        {},
-        {},
-        false,
-        true
-        );
-    termal.func.addell(
-        { {{-1,0},{5}} },
-        temp2,
-        {},
-        {},
-        false,
-        true
-        );
-
-    temp2[0].i = melt;
+    temp1[0].i = melt;
     termal.func.addell(
         { {{0,0},{1}} },
-        temp2,
+        temp1,
         { {EVERYTHING, { {0,0} } } },
         { {canmelt,{0,0}} },
         true
     );
-    temp2[0].i = solidify;
+    temp1[0].i = solidify;
     termal.func.addell(
         { {{0,0},{1}} },
-        temp2,
+        temp1,
         { {EVERYTHING, { {0,0} } } },
         { {cansolidify,{0,0}} },
         true
     );
 
+    vector<U> temp2 = {};
+    temp2.push_back(*a);
+    temp2.push_back(*a);
 
+    temp2[0].b = discharging;
+    temp2[1].b = coolcharging;
+
+    funcexunit<5, 2> charge;
+    charge.cond1 = inconductor1;
+    charge.func.doupdatesg({ {ELCOLDOWNS, { {0,0} } } });
+
+    temp1[0].b = charging;
+    charge.func.addell(
+        { {{0,1},{0}} },
+        temp1,
+        { {ELECTRISITY, { {0,1} } } },
+        { {inconductor,{0,1}} }
+    );
+    charge.func.addell(
+        { {{0,-1},{0}} },
+        temp1,
+        { {ELECTRISITY, { {0,-1} } } },
+        { {inconductor,{0,-1}} }
+    );
+    charge.func.addell(
+        { {{1,0},{0}} },
+        temp1,
+        { {ELECTRISITY, { {1,0} } } },
+        { {inconductor,{1,0}} }
+    );
+    charge.func.addell(
+        { {{-1,0},{0}} },
+        temp1,
+        { {ELECTRISITY, { {-1,0} } } },
+        { {inconductor,{-1,0}} }
+    );
+    charge.func.addell(
+        { {{0,0},{0}},{{0,0},{0}} },
+        temp2,
+        {},
+        {}
+    );
+
+    temp1[0].b = discoolcharging;
+    funcexunit<1, 1> discoolcharge;
+    discoolcharge.cond1 = instvoid1;
+    discoolcharge.func.addell(
+        { {{0,0},{0}} },
+        temp1,
+        {},
+        {}
+    );
+        //arr[1][0] = new BasicMat;
+        //arr[1][0]->type = COPPER;
 
     int gg = 0;
     int i = 0;
     auto frame = chrono::high_resolution_clock::now();
     auto endframe = chrono::high_resolution_clock::now();
-    BasicMat Examplesand;
-    Examplesand.type = SAND;
-    BasicMat Examplewater;
-    Examplewater.type = WATER;
-    BasicMat hotiron;
-    hotiron.type = IRON;
-    hotiron.t = 999;
-
     pairset updateset(UPDATESETCOUNT.count, COL, ROW);
-    //for (int i = 0; i < 10; i++) {
-    //    updateset.os.push_back({});
-    //}
-
     vector<updatee> changeset;
 
-    auto before = chrono::high_resolution_clock::now();
+    BasicMat Examplesand;
+    Examplesand.type = SAND;
+
+    BasicMat Examplewater;
+    Examplewater.type = WATER;
+
+    Counuctor hotiron;
+    hotiron.type = IRON;
+    hotiron.t = 1999;
+
+    Counuctor electroiron;
+    electroiron.type = IRON;
+    electroiron.charge = true;
+
+
+    //auto before = chrono::high_resolution_clock::now();
     while (!gg) {
         frame = chrono::high_resolution_clock::now();
-        //printboardtemprature(arr, COL, ROW);
-        printboard(arr, COL, ROW);
-        //vector<funcexunit<3, 1>> temp = {sandfall};
-        update(arr, COL, ROW, updateset, termal, changeset, TERMAL);
+        if(!(i%SKIPFRAMES)){
+            //printboardtemprature(arr, COL, ROW);
+            printboard(arr, COL, ROW);
+        }
+        update(arr, COL, ROW, updateset, termal, changeset, TERMAL,true);
+        update(arr, COL, ROW, updateset, charge, changeset, ELECTRISITY, true);
+        update(arr, COL, ROW, updateset, discoolcharge, changeset, ELCOLDOWNS, true);
         update(arr, COL, ROW, updateset, sandfall, changeset, FALLING);
-        //vector<funcexunit<5, 1>> temp2 = {waterfall};
         update(arr, COL, ROW, updateset, waterfall, changeset, FLOATING);
         
         applychangeset(arr, COL, ROW, changeset);
         //pointsetBasicMat(arr, COL, ROW, 3, 3, { FALLING }, updateset, Examplesand);
         //pointsetBasicMat(arr, COL, ROW, 3, 13, { WATERFALL }, updateset, Examplewater);
-        pointsetBasicMat(arr, COL, ROW, 0, 1, { TERMAL }, updateset, hotiron);
+        pointsetBasicMat(arr, COL, ROW, 1, 9, { TERMAL }, updateset, hotiron);
+        pointsetBasicMat(arr, COL, ROW, 30, 4, { ELECTRISITY }, updateset, electroiron);
         updateset.refresh();
 
         endframe = chrono::high_resolution_clock::now();
