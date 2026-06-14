@@ -51,10 +51,12 @@ static bool instvoid1(Pixel* a) {
     return (consti(a->type, TYPE) != VOIDC);
 }
 static bool inconductor1(Pixel* a) {
-    return (consti(a->type, TYPE) == COUNDUCTOR and !a->getbit(ELCOLDOWN));
+    //cout << (consti(a->type, TYPE) == COUNDUCTOR and !a->getbit(ELCOLDOWN));
+    return (consti(a->type, TYPE) == COUNDUCTOR and !(a->getbit(ELCOLDOWN)));
+    
 }
 static bool inconductor(Pixel* a, Pixel* b) {
-    return (consti(a->type, TYPE) == COUNDUCTOR and !a->getbit(ELCOLDOWN));
+    return (consti(a->type, TYPE) == COUNDUCTOR and !(a->getbit(ELCOLDOWN)));
 }
 static Changeb charging(Pixel* a, Pixel* b) {
     return { POWER,true };
@@ -67,6 +69,15 @@ static Changeb coolcharging(Pixel* a, Pixel* b) {
 }
 static Changeb discoolcharging(Pixel* a, Pixel* b) {
     return { ELCOLDOWN,false };
+}
+//static bool ischarge(Pixel* a, Pixel* b) {
+//    return a->getbit(POWER) and !a->getbit(ELCOLDOWN);
+//}
+static bool ischarge1(Pixel* a) {
+    return ((a->getbit(POWER)) and !(a->getbit(ELCOLDOWN)));
+}
+static bool iscoolcharge1(Pixel* a) {
+    return ((a->getbit(ELCOLDOWN)));
 }
 char pixelchar(int type) {
     switch (type) {
@@ -151,6 +162,7 @@ int termalcolors(float tempr) {
     }
 }
 void displaypixel(Pixel* a) {
+    //cout << a->getbit(POWER);
     if (a->getbit(POWER)) {
         SetColor(pixelcolors(a->type), 14);
     }
@@ -204,6 +216,13 @@ static void printboardtemprature(Pixel*** arr, int COL, int ROW) {
 static void pointsetBasicMat(Pixel*** arr, int COL, int ROW, int x, int y, vector<updatesets> a, pairset& updateset, BasicMat b) {
     delete arr[x & maskx][y & masky];
     arr[x & maskx][y & masky] = new BasicMat{ b };
+    for (updatesets k : a) {
+        updateset.ns[k].push_back({ x & maskx,y & masky });
+    }
+}
+static void pointsetBasicMat(Pixel*** arr, int COL, int ROW, int x, int y, vector<updatesets> a, pairset& updateset, Counuctor b) {
+    delete arr[x & maskx][y & masky];
+    arr[x & maskx][y & masky] = new Counuctor{ b };
     for (updatesets k : a) {
         updateset.ns[k].push_back({ x & maskx,y & masky });
     }
@@ -268,8 +287,15 @@ int main()
 
     for (int i = 0; i < COL-1; i++) {
         for (int j = 3; j < 14; j++) {
-            arr[i][j] = new BasicMat;
+            arr[i][j] = new Counuctor;
             arr[i][j]->type = COPPER;
+        }
+
+    }
+    for (int i = 0; i < COL -1; i++) {
+        for (int j = 0; j < 2; j++) {
+            arr[i][j] = new Counuctor;
+            arr[i][j]->type = IRON;
         }
 
     }
@@ -383,14 +409,14 @@ int main()
     temp2.push_back(*a);
     temp2.push_back(*a);
 
-    temp2[0].b = discharging;
-    temp2[1].b = coolcharging;
+
 
     funcexunit<5, 2> charge;
-    charge.cond1 = inconductor1;
+    charge.cond1 = ischarge1;
     charge.func.doupdatesg({ {ELCOLDOWNS, { {0,0} } } });
 
     temp1[0].b = charging;
+
     charge.func.addell(
         { {{0,1},{0}} },
         temp1,
@@ -415,6 +441,9 @@ int main()
         { {ELECTRISITY, { {-1,0} } } },
         { {inconductor,{-1,0}} }
     );
+
+    temp2[0].b = discharging;
+    temp2[1].b = coolcharging;
     charge.func.addell(
         { {{0,0},{0}},{{0,0},{0}} },
         temp2,
@@ -424,7 +453,7 @@ int main()
 
     temp1[0].b = discoolcharging;
     funcexunit<1, 1> discoolcharge;
-    discoolcharge.cond1 = instvoid1;
+    discoolcharge.cond1 = iscoolcharge1;
     discoolcharge.func.addell(
         { {{0,0},{0}} },
         temp1,
@@ -464,8 +493,9 @@ int main()
             printboard(arr, COL, ROW);
         }
         update(arr, COL, ROW, updateset, termal, changeset, TERMAL,true);
-        update(arr, COL, ROW, updateset, charge, changeset, ELECTRISITY, true);
-        update(arr, COL, ROW, updateset, discoolcharge, changeset, ELCOLDOWNS, true);
+        update(arr, COL, ROW, updateset, discoolcharge, changeset, ELCOLDOWNS);
+        update(arr, COL, ROW, updateset, charge, changeset, ELECTRISITY);
+        applychangeset(arr, COL, ROW, changeset);
         update(arr, COL, ROW, updateset, sandfall, changeset, FALLING);
         update(arr, COL, ROW, updateset, waterfall, changeset, FLOATING);
         
@@ -473,9 +503,8 @@ int main()
         //pointsetBasicMat(arr, COL, ROW, 3, 3, { FALLING }, updateset, Examplesand);
         //pointsetBasicMat(arr, COL, ROW, 3, 13, { WATERFALL }, updateset, Examplewater);
         pointsetBasicMat(arr, COL, ROW, 1, 9, { TERMAL }, updateset, hotiron);
-        pointsetBasicMat(arr, COL, ROW, 30, 4, { ELECTRISITY }, updateset, electroiron);
+        pointsetBasicMat(arr, COL, ROW, 30, 1, { ELECTRISITY }, updateset, electroiron);
         updateset.refresh();
-
         endframe = chrono::high_resolution_clock::now();
         std::this_thread::sleep_for(std::chrono::microseconds(1000000 / FRAMERATE - (chrono::duration_cast<chrono::microseconds>(endframe - frame).count())));
 
