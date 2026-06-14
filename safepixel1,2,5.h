@@ -26,12 +26,12 @@ void setmasks(int x, int y) {
 
 //Can disable error messages for some types of "CANNONT FIND ELEMENT" 
 void errp(char type, char path) {
-    switch (type)
-    {
-    default:
-        cout << "CANNONT FIND ELEMENT: " << path << " AT TYPE " << type << endl;
-        break;
-    }
+    //switch (type)
+    //{
+    //default:
+    //    cout << "CANNONT FIND ELEMENT: " << path << " AT TYPE " << type << endl;
+    //    break;
+    //}
 }
 
 
@@ -198,19 +198,54 @@ public:
         return;
     };
 };
-
+class Counuctor : public BasicMat {
+public:
+    bool charge=0;
+    bool cooldown=0;
+    virtual bool getbit(variableb a) {
+        switch (a)
+        {
+        case POWER:
+            return charge;
+            break;
+        case ELCOLDOWN:
+            return cooldown;
+            break;
+        default:
+            errp(type, a);
+            return 0;
+            break;
+        }
+    }
+    virtual void writebit(variableb a, bool b) {
+        switch (a)
+        {
+        case POWER:
+            charge=b;
+            break;
+        case ELCOLDOWN:
+            cooldown=b;
+            break;
+        default:
+            errp(type, a);
+            return;
+            break;
+        }
+    }
+};
 
 void rewrite_type(Pixel* a, classes type) {
-    delete a;
+    Pixel* b;
     switch (type)
     {
     case VOIDC:
-        a = new Void;
+        b = new Void;
         return;
     case BASICMAT:
-        a = new BasicMat;
+        b = new BasicMat;
         return;
     case COUNDUCTOR:
+        b = new Counuctor;
         return;
     case PARTICLE:
         return;
@@ -218,6 +253,27 @@ void rewrite_type(Pixel* a, classes type) {
         cout << "ERROR AT REWRITING CLASS";
         return;
     }
+    for (auto d:paramiterclasses(static_cast<classes>(consti(a->type, TYPE)))) {
+        switch (d.second)
+        {
+        case 0:
+            b->writebit(d.first.bv, a->getbit(d.first.bv));
+            break;
+        case 1:
+            b->writeint(d.first.iv, a->getint(d.first.iv));
+            break;
+        case 2:
+            b->writefloat(d.first.fv, a->getfloat(d.first.fv));
+            break;
+        default:
+            cout << "ERROR AT REWRITING CLASS 2";
+            break;
+        }
+    }
+
+    delete a;
+    a = b;
+    
 }
 
 void Pixel::writeint(variablei a, int b) {
@@ -318,6 +374,7 @@ struct func2d {
     toupdate toupdates;
     bool breakontrue;
     bool reverceapply=false;
+    int size=1;
     array<pair<pair<int, int>, pair<U, unsigned char>>, Funcsize> func;
 };
 
@@ -348,7 +405,8 @@ struct funcarr {
         vector<pair<updatesets, vector<pair<int, int>>>> toupdates1,
         vector<pair<conditionchar, pair<int, int>>> condition, bool breakontrue1= false,bool reverceapply1=false) {
         array<pair<pair<int, int>, pair<U, unsigned char>>, Funcsize> func;
-        if (f.size() != Funcsize or f2.size() != Funcsize) cout << "ERROR AT ADDELL";
+        cout << '1';
+        if (f.size() != f2.size()) cout << "ERROR AT ADDELL";
         for (int i = 0; i < f.size(); i++) {
             func[i].first=f[i].first;
             func[i].second.second = f[i].second;
@@ -359,6 +417,7 @@ struct funcarr {
         a.toupdates.create(toupdates1);
         a.breakontrue = breakontrue1;
         a.reverceapply = reverceapply1;
+        a.size = f.size();
         a.func = func;
         settingarr.at(size1) = a;
         size1++;
@@ -417,6 +476,14 @@ struct funcarr {
     bool reverceapply(int i) {
         if (i < size1) {
             return settingarr[i].reverceapply;
+        }
+        else {
+            cout << "ERROR OUT OF INDEX breakontrue";
+        }
+    }
+    int size(int i) {
+        if (i < size1) {
+            return settingarr[i].size;
         }
         else {
             cout << "ERROR OUT OF INDEX breakontrue";
@@ -545,6 +612,7 @@ void applychange(Pixel***& arr, int col, int row, updatee& a) {
     case(5):
         //cout << "value: " << ((a.data.f).value)<< endl;
         (arr[a.x][a.y])->writedfloat((a.data.f).path, (a.data.f).value);
+        //cout << "a";
         break;
     default:
         cout << "ERROR AT APPLYING CHANGE VALUE";
@@ -566,7 +634,8 @@ void saferunup(Pixel*** arr, int col, int row, int x, int y, funcarr<Size, Funcs
 
         if (runcondarr(a.cond(i), arr, col, row, x, y)) {
             //cout << "g3";
-            for (const pair<pair<int, int>, pair<U, unsigned char>>& k : a.funb(i)) {
+            for (int u = 0; u < a.size(i);u++) {
+                const pair<pair<int, int>, pair<U, unsigned char>>& k = a.funb(i)[u];
                     upd.x = (x + k.first.first) & maskx;
                     upd.y = (y + k.first.second) & masky;
                 switch (k.second.second)
