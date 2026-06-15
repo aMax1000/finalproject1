@@ -51,7 +51,7 @@ enum matreals {
 	////mechanisms
 	//GANTRY_SHAFT,
 	//GANTRY_CARRIAGE,
-	//VALVE,
+	GATE,
 	//PULSER,
 	//CONDUCTBRIDGE,
 
@@ -323,10 +323,30 @@ int consti(matreals type, paramiteri selector) {
 		default:
 			break;
 		}
+	case GATE:
+		switch (selector)
+		{
+		case TYPE:
+			return COUNDUCTOR;
+			break;
+		case DENSITY:
+			return 100;
+			break;
+		case MELT_TYPE:
+			return -1;
+			break;
+		case SOLID_TYPE:
+			return -1;
+			break;
+		default:
+			break;
+		}
 	default:
+		if(selector != MELT_TYPE or selector != SOLID_TYPE)
 		cout << "ERROR AT TYPE FINDER";
 		break;
 	}
+	
 	return -1;
 }
 
@@ -371,8 +391,6 @@ float constf(matreals type, paramiterf selector) {
 		default:
 			break;
 		}
-	default:
-		break;
 	case MOLTEN_IRON:
 		switch (selector)
 		{
@@ -415,9 +433,24 @@ float constf(matreals type, paramiterf selector) {
 		default:
 			break;
 		}
+	case GATE:
+		switch (selector)
+		{
+		case THERMAL_CONDUCIVITY:
+			return 0.05;
+			break;
+		case MELT_TEMPRATURE:
+			break;
+		case SOLID_TEMPRATURE:
+			break;
+		default:
+			break;
+		}
+	default:
+		break;
 	}
-	
-	return -1;
+
+	return 0;
 }
 
 bool constb(matreals type, paramiterb selector) {
@@ -501,17 +534,21 @@ enum updatesets {
 	FLOATING,
 	ELECTRISITY,
 	ELCOLDOWNS,
+	GATECOOLDOWNSET,
 	EVERYTHING,
+	//values for non update uses
+	CLOSEGATE,
 };
 
 
 struct UPDATESETCOUNTclass {
 	int count = 1;
 	UPDATESETCOUNTclass() {
-		for (int i = 0; i != EVERYTHING; i++) {
+		for (int i = 0; i != CLOSEGATE; i++) {
 			count++;
 		}
 	}
 };
 
 UPDATESETCOUNTclass UPDATESETCOUNT;
+
