@@ -102,7 +102,7 @@ union Uv {
 	variablef fv;
 };
 
-vector<pair<Uv, unsigned char>> paramiterclasses(classes a){
+vector<pair<Uv, unsigned char>> paramiterclasses(classes a) {
 	vector<pair<Uv, unsigned char>> b;
 	switch (a)
 	{
@@ -313,7 +313,7 @@ int consti(matreals type, paramiteri selector) {
 			break;
 		case DENSITY:
 			return 19;
-			break;	
+			break;
 		case MELT_TYPE:
 			return -1;
 			break;
@@ -342,11 +342,11 @@ int consti(matreals type, paramiteri selector) {
 			break;
 		}
 	default:
-		if(selector != MELT_TYPE or selector != SOLID_TYPE)
-		cout << "ERROR AT TYPE FINDER";
+		if (selector != MELT_TYPE or selector != SOLID_TYPE)
+			cout << "ERROR AT TYPE FINDER";
 		break;
 	}
-	
+
 	return -1;
 }
 
@@ -543,12 +543,15 @@ enum updatesets {
 
 struct UPDATESETCOUNTclass {
 	int count = 1;
+	int count2 = 1;
 	UPDATESETCOUNTclass() {
 		for (int i = 0; i != CLOSEGATE; i++) {
 			count++;
+			if (i < EVERYTHING) {
+				count2++;
+			}
 		}
 	}
 };
 
 UPDATESETCOUNTclass UPDATESETCOUNT;
-
