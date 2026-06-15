@@ -41,7 +41,7 @@ protected:
 
 public:
 
-    matreals type;
+    matreals type=VOIDM;
 
     virtual bool getbit(variableb a) {
         switch (a)
@@ -151,9 +151,9 @@ public:
 
 class BasicMat : public Void {
 public:
-    float t = 3.0;
+    float t = 0;
     BasicMat() {
-        t = 2.0;
+        t = 0;
     }
     virtual float getfloat(variablef a) {
         switch (a)
@@ -573,8 +573,7 @@ struct pairset {
         for (int i = 0; i < ns.size(); i++) {
             if(i!=EVERYTHING) os[i] = ns[i].arr;
         }
-        for (int i = 0; i < ns.size(); i++) {
-            if (i != EVERYTHING)
+        for (int i = 0; i < EVERYTHING; i++) {
             for (pair<int,int> a1: ns[EVERYTHING].arr) {
                 os[i].push_back(a1);
             }
