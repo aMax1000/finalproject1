@@ -14,6 +14,7 @@
 #include "basicslib.h"
 #include "safepixel1,2,5.h"
 #include "constdata.h"
+#include "sandfall.h"
 
 static bool isair(Pixel* a, Pixel* b) {
     return (a)->getint(TYPEV) == VOIDM;
@@ -83,6 +84,13 @@ static bool ischarge1(Pixel* a) {
 static bool iscoolcharge1(Pixel* a) {
     return ((a->getbit(ELCOLDOWN)));
 }
+//static bool isgate(Pixel* a, Pixel* b) {
+//    return (a->type == GATE);
+//}
+//static Changei disablegate(Pixel* a, Pixel* b) {
+//    return { TYPEV,VOIDM };
+//}
+
 char pixelchar(int type) {
     switch (type) {
     case VOIDM:
@@ -369,15 +377,15 @@ int main()
     waterfall.func.addell(
         { 0, 1 },
         { { TERMAL, {{0,1}} },
-        { FLOATING, {{0,1}} }, 
+        { FLOATING, {{0,1}} },
         { FALLING, {{0,1}} }, },
         { {isair,{0,1}},{issimplefloatable,{1,0}} },
         true);
 
     waterfall.func.addell(
         { 0, -1 },
-        { 
-        { TERMAL, {{0,-1}} }, 
+        {
+        { TERMAL, {{0,-1}} },
         { FLOATING, {{0,-1}} },
         { FALLING, {{0,-1}} },
         },
@@ -445,25 +453,25 @@ int main()
     charge.func.addell(
         { {{0,1},{0}} },
         temp1,
-        { {ELECTRISITY, { {0,1} } } },
+        { {ELECTRISITY, { {0,1} }},{CLOSEGATE, { {0,1} } } },
         { {inconductor,{0,1}} }
     );
     charge.func.addell(
         { {{0,-1},{0}} },
         temp1,
-        { {ELECTRISITY, { {0,-1} } } },
+        { {ELECTRISITY, { {0,-1} }},{CLOSEGATE, { {0,-1} } } },
         { {inconductor,{0,-1}} }
     );
     charge.func.addell(
         { {{1,0},{0}} },
         temp1,
-        { {ELECTRISITY, { {1,0} } } },
+        { {ELECTRISITY, { {1,0} }},{CLOSEGATE, { {1,0} } } },
         { {inconductor,{1,0}} }
     );
     charge.func.addell(
         { {{-1,0},{0}} },
         temp1,
-        { {ELECTRISITY, { {-1,0} } } },
+        { {ELECTRISITY, { {-1,0} }},{CLOSEGATE, { {-1,0} } } },
         { {inconductor,{-1,0}} }
     );
 
@@ -492,7 +500,7 @@ int main()
     int i = 0;
     auto frame = chrono::high_resolution_clock::now();
     auto endframe = chrono::high_resolution_clock::now();
-    pairset updateset(UPDATESETCOUNT.count, COL, ROW);
+    pairset updateset(COL, ROW);
     vector<updatee> changeset;
 
     BasicMat Examplesand;
@@ -521,6 +529,7 @@ int main()
         update(arr, COL, ROW, updateset, discoolcharge, changeset, ELCOLDOWNS);
         update(arr, COL, ROW, updateset, charge, changeset, ELECTRISITY);
         applychangeset(arr, COL, ROW, changeset);
+        gateopen(arr, COL, ROW, updateset);
         update(arr, COL, ROW, updateset, sandfall, changeset, FALLING);
         update(arr, COL, ROW, updateset, waterfall, changeset, FLOATING);
 
