@@ -407,7 +407,6 @@ struct funcarr {
         vector<pair<updatesets, vector<pair<int, int>>>> toupdates1,
         vector<pair<conditionchar, pair<int, int>>> condition, bool breakontrue1 = false, bool reverceapply1 = false) {
         array<pair<pair<int, int>, pair<U, unsigned char>>, Funcsize> func;
-        cout << '1';
         if (f.size() != f2.size()) cout << "ERROR AT ADDELL";
         for (int i = 0; i < f.size(); i++) {
             func[i].first = f[i].first;
@@ -561,7 +560,7 @@ struct pairset {
             newupdatesett* aboba = new newupdatesett{ col,row };
             os.push_back({});
             ns.push_back(*aboba);
-            if(i< UPDATESETCOUNT.count2){
+            if (i < UPDATESETCOUNT.count2) {
                 for (int k = 0; k < col; k++) {
                     for (int j = 0; j < row; j++) {
                         os[i].push_back({ k,j });
