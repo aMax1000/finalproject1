@@ -15,9 +15,10 @@
 #include "safepixel1,2,5.h"
 #include "constdata.h"
 #include "sandfall.h"
+#include "menu.h"
 
 static bool isair(Pixel* a, Pixel* b) {
-    return (a)->getint(TYPEV) == VOIDM;
+    return consti(a->type,DENSITY)< consti(b->type, DENSITY);
 }
 static bool issimplefallable(Pixel* a) {
     return constb(a->type, IS_SIMPLEFALLABLE);
@@ -232,20 +233,34 @@ static void printboardtemprature(Pixel*** arr, int COL, int ROW) {
 }
 
 
-static void pointsetBasicMat(Pixel*** arr, int COL, int ROW, int x, int y, vector<updatesets> a, pairset& updateset, BasicMat b) {
+static void pointsetBasicMat(Pixel*** arr, int COL, int ROW, int x, int y, vector<updatesets> a, pairset& updateset, Pixel* b) {
     delete arr[x & maskx][y & masky];
-    arr[x & maskx][y & masky] = new BasicMat{ b };
+    switch (consti(b->type,TYPE))
+    {
+        case VOIDC:
+            arr[x & maskx][y & masky] = new Void{ *reinterpret_cast<Void*>(b) };
+            break;
+        case BASICMAT:
+            arr[x & maskx][y & masky] = new BasicMat{ *reinterpret_cast<BasicMat*>(b) };
+            break;
+        case COUNDUCTOR:
+            arr[x & maskx][y & masky] = new Counuctor{ *reinterpret_cast<Counuctor*>(b) };
+            break;
+    default:
+        break;
+    }
+    
     for (updatesets k : a) {
         updateset.ns[k].push_back({ x & maskx,y & masky });
     }
 }
-static void pointsetBasicMat(Pixel*** arr, int COL, int ROW, int x, int y, vector<updatesets> a, pairset& updateset, Counuctor b) {
-    delete arr[x & maskx][y & masky];
-    arr[x & maskx][y & masky] = new Counuctor{ b };
-    for (updatesets k : a) {
-        updateset.ns[k].push_back({ x & maskx,y & masky });
-    }
-}
+//static void pointsetBasicMat(Pixel*** arr, int COL, int ROW, int x, int y, vector<updatesets> a, pairset& updateset, Counuctor b) {
+//    delete arr[x & maskx][y & masky];
+//    arr[x & maskx][y & masky] = new Counuctor{ b };
+//    for (updatesets k : a) {
+//        updateset.ns[k].push_back({ x & maskx,y & masky });
+//    }
+//}
 
 //struct mainb {
 //    int COL;
@@ -263,8 +278,9 @@ int main()
     cin.tie(NULL);
 
 
-    int COL = pow(2, 5);
-    int ROW = pow(2, 5);
+    int COL;
+    int ROW;
+    Pixel*** arr = runSandfall(COL, ROW);
     constexpr auto FRAMERATE = 5;
     constexpr auto SKIPFRAMES = 1;
     signed char** gatearr = new signed char *[COL];
@@ -277,15 +293,15 @@ int main()
 
 
     setmasks(COL, ROW);
-    Pixel*** arr = new Pixel * *[COL];
-    for (int i = 0; i < COL; i++) {
-        arr[i] = new Pixel * [ROW];
-    }
-    for (int i = 0; i < COL; i++) {
-        for (int j = 0; j < ROW; j++) {
-            arr[i][j] = new Void;
-        }
-    }
+    //Pixel*** arr = new Pixel * *[COL];
+    //for (int i = 0; i < COL; i++) {
+    //    arr[i] = new Pixel * [ROW];
+    //}
+    //for (int i = 0; i < COL; i++) {
+    //    for (int j = 0; j < ROW; j++) {
+    //        arr[i][j] = new Void;
+    //    }
+    //}
     //d
     //for (int i = 0; i < COL; i += 2) {
     //    for (int j = 0; j < ROW; j++) {
@@ -320,20 +336,20 @@ int main()
     //    arr[i][15]->type = BEDROCK;
     //}
 
-    for (int i = 0; i < COL - 1; i++) {
-        for (int j = 3; j < 14; j++) {
-            arr[i][j] = new Counuctor;
-            arr[i][j]->type = COPPER;
-        }
+    //for (int i = 0; i < COL - 1; i++) {
+    //    for (int j = 3; j < 14; j++) {
+    //        arr[i][j] = new Counuctor;
+    //        arr[i][j]->type = COPPER;
+    //    }
 
-    }
-    for (int i = 0; i < COL - 1; i++) {
-        for (int j = 0; j < 2; j++) {
-            arr[i][j] = new Counuctor;
-            arr[i][j]->type = GATE;
-        }
+    //}
+    //for (int i = 0; i < COL - 1; i++) {
+    //    for (int j = 0; j < 2; j++) {
+    //        arr[i][j] = new Counuctor;
+    //        arr[i][j]->type = GATE;
+    //    }
 
-    }
+    //}
 
     //functions
     funcexunit<3, 1> sandfall;
@@ -545,6 +561,7 @@ int main()
             //printboardtemprature(arr, COL, ROW);
             printboard(arr, COL, ROW);
         }
+
         update(arr, COL, ROW, updateset, termal, changeset, TERMAL, true);
         update(arr, COL, ROW, updateset, discoolcharge, changeset, ELCOLDOWNS);
         update(arr, COL, ROW, updateset, charge, changeset, ELECTRISITY);
@@ -558,10 +575,10 @@ int main()
         update(arr, COL, ROW, updateset, waterfall, changeset, FLOATING);
 
         applychangeset(arr, COL, ROW, changeset);
-        //pointsetBasicMat(arr, COL, ROW, 3, 3, { FALLING }, updateset, Examplesand);
+        //pointsetBasicMat(arr, COL, ROW, 3, 3, { FALLING }, updateset, &Examplesand);
         //pointsetBasicMat(arr, COL, ROW, 3, 13, { WATERFALL }, updateset, Examplewater);
-        pointsetBasicMat(arr, COL, ROW, 2, 9, { TERMAL }, updateset, hotiron);
-        pointsetBasicMat(arr, COL, ROW, 30, 1, { ELECTRISITY }, updateset, electroiron);
+        pointsetBasicMat(arr, COL, ROW, 2, 11, { TERMAL }, updateset, &hotiron);
+        pointsetBasicMat(arr, COL, ROW, 30, 1, { ELECTRISITY }, updateset, &electroiron);
         updateset.refresh();
         endframe = chrono::high_resolution_clock::now();
         std::this_thread::sleep_for(std::chrono::microseconds(1000000 / FRAMERATE - (chrono::duration_cast<chrono::microseconds>(endframe - frame).count())));
