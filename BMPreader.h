@@ -65,7 +65,7 @@ public:
     BmpFileHeader fileHeader;
     BmpInfoHeader infoHeader;
     std::vector < std::vector<Pixelbmp>> arr;
-    bool readHeader(const std::string& filename) {
+    bool readHeader(const std::string& filename,int& col,int& row) {
         std::ifstream file(filename, std::ios::binary);
         if (!file) {
             std::cerr << "Error: Could not open file " << filename << std::endl;
@@ -84,7 +84,9 @@ public:
 
         // Read Info Header (40 bytes)
         file.read(reinterpret_cast<char*>(&infoHeader), sizeof(infoHeader));
-        
+        row = infoHeader.width;
+        //cout << row;
+        col = infoHeader.height;
         file.seekg(fileHeader.offsetData);
         for (int i = 0; i < infoHeader.height; i++) {
             arr.push_back({});
@@ -95,6 +97,7 @@ public:
             //file.seekg(1, std::fstream::cur);
         }
         reverce(arr);
+        file.close();
         return static_cast<bool>(file);
     }
 };
