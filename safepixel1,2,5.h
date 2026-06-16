@@ -204,6 +204,10 @@ class Counuctor : public BasicMat {
 public:
     bool charge = 0;
     bool cooldown = 0;
+    Counuctor() {
+        charge = 0;
+        cooldown = 0;
+    }
     virtual bool getbit(variableb a) {
         switch (a)
         {
@@ -244,15 +248,15 @@ void rewrite_type(Pixel* a, classes type) {
     {
     case VOIDC:
         b = new Void;
-        return;
+        break;
     case BASICMAT:
         b = new BasicMat;
-        return;
+        break;
     case COUNDUCTOR:
         b = new Counuctor;
-        return;
-    case PARTICLE:
-        return;
+        break;
+    //case PARTICLE:
+    //    return;
     default:
         cout << "ERROR AT REWRITING CLASS";
         return;
@@ -284,10 +288,10 @@ void Pixel::writeint(variablei a, int b) {
     switch (a)
     {
     case TYPEV:
+        type = static_cast<matreals>(b);
         if (consti(type, TYPE) != consti(static_cast<matreals>(b), TYPE)) {
             rewrite_type(this, static_cast<classes>(consti(static_cast<matreals>(b), TYPE)));
         }
-        type = static_cast<matreals>(b);
         break;
     default:
         errp(type, a);
