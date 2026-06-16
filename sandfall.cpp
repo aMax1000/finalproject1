@@ -75,6 +75,7 @@ static Changeb discoolcharging(Pixel* a, Pixel* b) {
 //    return a->getbit(ISGATE) and !a->getbit(ELCOLDOWN);
 //}
 
+//d
 //static bool ischarge(Pixel* a, Pixel* b) {
 //    return a->getbit(POWER) and !a->getbit(ELCOLDOWN);
 //}
@@ -285,6 +286,7 @@ int main()
             arr[i][j] = new Void;
         }
     }
+    //d
     //for (int i = 0; i < COL; i += 2) {
     //    for (int j = 0; j < ROW; j++) {
     //        arr[i][j] = new BasicMat;
@@ -292,6 +294,7 @@ int main()
     //    }
     //}
 
+    //d
     //for (int j = 1; j < 5; j++) {
     //    arr[10][j] = new BasicMat;
     //    arr[10][j]->type = BEDROCK;
@@ -533,11 +536,12 @@ int main()
     electroiron.type = IRON;
     electroiron.charge = true;
 
-
+    //d
     //auto before = chrono::high_resolution_clock::now();
     while (!gg) {
         frame = chrono::high_resolution_clock::now();
         if (!(i % SKIPFRAMES)) {
+            //d
             //printboardtemprature(arr, COL, ROW);
             printboard(arr, COL, ROW);
         }
@@ -561,7 +565,8 @@ int main()
         updateset.refresh();
         endframe = chrono::high_resolution_clock::now();
         std::this_thread::sleep_for(std::chrono::microseconds(1000000 / FRAMERATE - (chrono::duration_cast<chrono::microseconds>(endframe - frame).count())));
-
+        
+        //d
         //if (i == 8) {
         //    auto end = chrono::high_resolution_clock::now();
         //    cout << "time:" << chrono::duration_cast<chrono::microseconds>(end - before).count() << endl;
