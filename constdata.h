@@ -109,33 +109,27 @@ vector<pair<Uv, unsigned char>> paramiterclasses(classes a) {
 	switch (a)
 	{
 	case VOIDC:
+		for (int i = 0; i < 0; i++) {
+			b.push_back({});
+		}
+		break;
+	case BASICMAT:
 		for (int i = 0; i < 1; i++) {
 			b.push_back({});
 		}
-		b[0].first.iv = TYPEV;
-		b[0].second = 1;
-		break;
-	case BASICMAT:
-		for (int i = 0; i < 2; i++) {
-			b.push_back({});
-		}
-		b[0].first.iv = TYPEV;
-		b[0].second = 1;
-		b[1].first.fv = TEMPRATURE;
-		b[1].second = 2;
+		b[0].first.fv = TEMPRATURE;
+		b[0].second = 2;
 		break;
 	case COUNDUCTOR:
-		for (int i = 0; i < 4; i++) {
+		for (int i = 0; i < 3; i++) {
 			b.push_back({});
 		}
-		b[0].first.iv = TYPEV;
-		b[0].second = 1;
-		b[1].first.fv = TEMPRATURE;
-		b[1].second = 2;
-		b[2].first.bv = POWER;
+		b[0].first.fv = TEMPRATURE;
+		b[0].second = 2;
+		b[1].first.bv = POWER;
+		b[1].second = 0;
+		b[2].first.bv = ELCOLDOWN;
 		b[2].second = 0;
-		b[3].first.bv = ELCOLDOWN;
-		b[3].second = 0;
 		break;
 	case PARTICLE:
 		break;
@@ -378,6 +372,18 @@ float constf(matreals type, paramiterf selector) {
 	case BEDROCK:
 		break;
 	case WATER:
+		switch (selector)
+		{
+		case THERMAL_CONDUCIVITY:
+			return 0.35;
+			break;
+		case MELT_TEMPRATURE:
+			break;
+		case SOLID_TEMPRATURE:
+			break;
+		default:
+			break;
+		}
 		break;
 	case IRON:
 		switch (selector)
