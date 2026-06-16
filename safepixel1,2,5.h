@@ -12,6 +12,7 @@
 #include <array>
 #include "basicslib.h"
 #include "constdata.h"
+#include "BMPreader.h"
 using namespace std;
 
 unsigned short maskx;
@@ -26,6 +27,7 @@ void setmasks(int x, int y) {
 
 //Can disable error messages for some types of "CANNONT FIND ELEMENT" 
 void errp(char type, char path) {
+    //d
     //switch (type)
     //{
     //default:
