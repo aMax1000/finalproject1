@@ -535,8 +535,13 @@ enum updatesets {
 	ELECTRISITY,
 	ELCOLDOWNS,
 	GATECOOLDOWNSET,
+
+	//new values here
 	EVERYTHING,
 	//values for non update uses
+	GATEUPDATE,
+	//new non update values here
+
 	CLOSEGATE,
 };
 
