@@ -61,12 +61,6 @@ Pixel* pixeltopixel(Pixelbmp a, Pixel* b) {
         default:
             break;
         }
-    //switch ()
-    //{
-    //    case 
-    //default:
-    //    break;
-    //}
     return b;
 }
 
