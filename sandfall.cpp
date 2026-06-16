@@ -57,7 +57,7 @@ static bool inconductor1(Pixel* a) {
 
 }
 static bool inconductor(Pixel* a, Pixel* b) {
-    return (consti(a->type, TYPE) == COUNDUCTOR and !(a->getbit(ELCOLDOWN)) and !(a->getbit(POWER)));
+    return (!(a->getbit(ELCOLDOWN)) and !(a->getbit(POWER)));
 }
 static Changeb charging(Pixel* a, Pixel* b) {
     return { POWER,true };
@@ -266,6 +266,14 @@ int main()
     int ROW = pow(2, 5);
     constexpr auto FRAMERATE = 5;
     constexpr auto SKIPFRAMES = 1;
+    signed char** gatearr = new signed char *[COL];
+    for (int i = 0; i < COL; i++) {
+        gatearr[i] = new signed char [ROW];
+        for (int j = 0; j < ROW; j++) {
+            gatearr[i][j] = 0;
+        }
+    }
+
 
     setmasks(COL, ROW);
     Pixel*** arr = new Pixel * *[COL];
@@ -446,32 +454,40 @@ int main()
 
     funcexunit<5, 2> charge;
     charge.cond1 = ischarge1;
-    charge.func.doupdatesg({ {ELCOLDOWNS, { {0,0} } } });
+    charge.func.doupdatesg(
+    { 
+    {ELCOLDOWNS, { {0,0} } },
+    {CLOSEGATE, { {0,1} } },
+    {CLOSEGATE, { {0,-1} } },
+    {CLOSEGATE, { {1,0} } },
+    {CLOSEGATE, { {-1,0} } },
+
+    });
 
     temp1[0].b = charging;
 
     charge.func.addell(
         { {{0,1},{0}} },
         temp1,
-        { {ELECTRISITY, { {0,1} }},{CLOSEGATE, { {0,1} } } },
+        { {ELECTRISITY, { {0,1} }} },
         { {inconductor,{0,1}} }
     );
     charge.func.addell(
         { {{0,-1},{0}} },
         temp1,
-        { {ELECTRISITY, { {0,-1} }},{CLOSEGATE, { {0,-1} } } },
+        { {ELECTRISITY, { {0,-1} }}},
         { {inconductor,{0,-1}} }
     );
     charge.func.addell(
         { {{1,0},{0}} },
         temp1,
-        { {ELECTRISITY, { {1,0} }},{CLOSEGATE, { {1,0} } } },
+        { {ELECTRISITY, { {1,0} }}},
         { {inconductor,{1,0}} }
     );
     charge.func.addell(
         { {{-1,0},{0}} },
         temp1,
-        { {ELECTRISITY, { {-1,0} }},{CLOSEGATE, { {-1,0} } } },
+        { {ELECTRISITY, { {-1,0} }}},
         { {inconductor,{-1,0}} }
     );
 
@@ -528,8 +544,12 @@ int main()
         update(arr, COL, ROW, updateset, termal, changeset, TERMAL, true);
         update(arr, COL, ROW, updateset, discoolcharge, changeset, ELCOLDOWNS);
         update(arr, COL, ROW, updateset, charge, changeset, ELECTRISITY);
+        gateclose(arr, COL, ROW, updateset, gatearr);
+        gateopen(arr, COL, ROW, updateset, gatearr);
+        gateupdate(COL, ROW, updateset, gatearr);
+
         applychangeset(arr, COL, ROW, changeset);
-        gateopen(arr, COL, ROW, updateset);
+
         update(arr, COL, ROW, updateset, sandfall, changeset, FALLING);
         update(arr, COL, ROW, updateset, waterfall, changeset, FLOATING);
 
