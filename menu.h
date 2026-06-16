@@ -9,7 +9,7 @@ using namespace std;
 
 
 //OPTIONS FOR MENU
-enum SaveFiles {
+enum SaveFilesAndTemplates {
 	ONE,
 	TWO,
 	THREE,
@@ -36,6 +36,49 @@ Pixel*** chooseSave()
 		break;
 	case THREE:
 		filePath = "saves/s3.bin";
+		break;
+	default:
+		cout << "That is not an option.\n\n";
+		return nullptr;
+	}
+	ifstream file(filePath, std::ios::binary);
+	if (file.is_open())
+	{
+		file.read(reinterpret_cast<char*>(&col), sizeof(col));
+		file.read(reinterpret_cast<char*>(&row), sizeof(row));
+		arr = new Pixel * *[col];
+		for (int i = 0; i < col; i++) {
+			arr[i] = new Pixel * [row];
+			for (int j = 0; j < row; j++) {
+				file.read(reinterpret_cast<char*>(arr[i][j]), sizeof(Pixel));
+			}
+		}
+		file.close();
+		return arr;
+	}
+	else cout << "Unable to open file\n";
+}
+Pixel*** chooseTemplate()
+{
+	int col, row;
+	Pixel*** arr = nullptr;
+	unsigned int fileChoice;
+	cout << "--- Choose a template from the following: ---" << endl;
+	cout << ONE << endl;
+	cout << TWO << endl;
+	cout << THREE << endl;
+	cin >> fileChoice;
+	string filePath;
+	switch (fileChoice)
+	{
+	case ONE:
+		filePath = "templates/t1.bpm";
+		break;
+	case TWO:
+		filePath = "templates/t1.bpm";
+		break;
+	case THREE:
+		filePath = "templates/t1.bpm";
 		break;
 	default:
 		cout << "That is not an option.\n\n";
