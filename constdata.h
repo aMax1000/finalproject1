@@ -2,9 +2,11 @@
 #include <bit>
 #include <bitset>
 #include <iostream>
+#include "BMPreader.h"
 
 using namespace std;
 typedef bool bit;
+//з матеріалов не видаляти
 enum matreals {
 	VOIDM,
 
@@ -560,3 +562,5 @@ struct UPDATESETCOUNTclass {
 };
 
 UPDATESETCOUNTclass UPDATESETCOUNT;
+
+
