@@ -36,39 +36,64 @@ void gateupdate(int col, int row, pairset& pairupdateset, signed char** gatearr)
 
 
 
-Pixel* pixeltopixel(Pixelbmp a, Pixel* b) {
-        switch ((a.b) + (a.g) << 8 + (a.r) << 16)
+void pixeltopixel(Pixelbmp a, Pixel*& b) {
+    if(a.a>0){
+        switch ((a.b) + ((a.g) << 8) + ((a.r) << 16))
         {
-        case (0x):
+        case 0xFFD898:
             delete b;
             b = new BasicMat;
             b->type = SAND;
             break;
-        case IRON:
+        case 0xC0CCD6:
+            delete b;
+            b = new Counuctor;
+            b->type = IRON;
+            //cout << 'I';
             break;
-        case COPPER:
+        case 0xC8481E:
+            delete b;
+            b = new Counuctor;
+            b->type = COPPER;
             break;
-        case BEDROCK:
+        case 0x000000:
+            delete b;
+            b = new BasicMat;
+            b->type = BEDROCK;
             break;
-        case WATER:
+        case 0x78B4E9:
+            delete b;
+            b = new BasicMat;
+            b->type = WATER;
             break;
-        case MOLTEN_IRON:
+        case 0xFF7326:
+            delete b;
+            b = new BasicMat;
+            b->type = MOLTEN_IRON;
             break;
-        case MOLTEN_COPPER:
+        case 0xFF9926:
+            delete b;
+            b = new BasicMat;
+            b->type = MOLTEN_COPPER;
             break;
-        case GATE:
+        case 0x82919D:
+            delete b;
+            b = new Counuctor;
+            b->type = GATE;
             break;
         default:
             break;
         }
-    return b;
+    }
 }
 
-void pictoarr(vector<vector<Pixelbmp>> pic, Pixel*** arr, int COL, int ROW) {
+void pictoarr(vector<vector<Pixelbmp>>& pic, Pixel***& arr, int COL, int ROW) {
     if ((pic.size() != COL) or pic[0].size() != ROW) cout << "PIC AND BOARD NOT THE SAME SIZE";
     for (int i = 0; i < COL; i++) {
         for (int j = 0; j < ROW; j++) {
           pixeltopixel(pic[i][j], arr[i][j]);
+          //print(pic[i][j]);
+          //cout << arr[i][j]->type<<'\n';
         }
     }
 }
