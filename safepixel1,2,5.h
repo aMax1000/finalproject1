@@ -255,8 +255,8 @@ void rewrite_type(Pixel* a, classes type) {
     case COUNDUCTOR:
         b = new Counuctor;
         break;
-    //case PARTICLE:
-    //    return;
+        //case PARTICLE:
+        //    return;
     default:
         cout << "ERROR AT REWRITING CLASS";
         return;
@@ -577,13 +577,14 @@ struct pairset {
         }
     }
     void refresh() {
-        for (int i = 0; i < ns.size(); i++) {
-            if (i != EVERYTHING) os[i] = ns[i].arr;
-        }
         for (int i = 0; i < EVERYTHING; i++) {
             for (pair<int, int> a1 : ns[EVERYTHING].arr) {
-                os[i].push_back(a1);
+                ns[i].push_back(a1);
+                //print(a1);
             }
+        }
+        for (int i = 0; i < ns.size(); i++) {
+            if (i != EVERYTHING) os[i] = ns[i].arr;
         }
         for (int i = 0; i < ns.size(); i++) {
             ns[i].clear1();
